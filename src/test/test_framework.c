@@ -57,7 +57,7 @@ int test_setup_context(test_context_t *ctx, const char *test_name) {
     }
     
     /* Create unique test directory */
-    snprintf(ctx->test_dir, sizeof(ctx->test_dir), 
+    snprintf(ctx->test_dir, sizeof(ctx->test_dir) - 6,
              "/tmp/waitlock_test_%s_%d_%ld", 
              test_name, getpid(), time(NULL));
     

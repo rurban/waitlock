@@ -10,7 +10,7 @@
 
 /* Test context for isolated test environments */
 typedef struct {
-    char test_dir[PATH_MAX];
+    char test_dir[PATH_MAX - 50];
     char lock_dir[PATH_MAX]; 
     char original_lock_dir[PATH_MAX];
     pid_t test_pid;
