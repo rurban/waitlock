@@ -40,11 +40,11 @@ int test_setup_context(test_context_t *ctx, const char *test_name) {
     }
     
     /* Create unique test directory */
-    snprintf(ctx->test_dir, sizeof(ctx->test_dir), 
+    snprintf(ctx->test_dir, sizeof(ctx->test_dir) - 6,
              "/tmp/waitlock_test_%s_%d_%ld", 
              test_name, getpid(), time(NULL));
     
-    snprintf(ctx->lock_dir, sizeof(ctx->lock_dir), 
+    snprintf(ctx->lock_dir, sizeof(ctx->lock_dir),
              "%s/locks", ctx->test_dir);
     
     /* Create directories */
@@ -81,7 +81,7 @@ int test_teardown_context(test_context_t *ctx) {
     
     /* Kill any child processes spawned during this test */
     /* Note: This is a simple approach - in production we'd track child PIDs */
-    char cmd[512];
+    char cmd[PATH_MAX];
     snprintf(cmd, sizeof(cmd), "pkill -P %d 2>/dev/null || true", ctx->test_pid);
     system(cmd);
     
