@@ -37,7 +37,7 @@ OBJDIR = $(BUILDDIR)/obj
 # Build targets
 all: $(BINDIR)/waitlock
 
-$(BINDIR)/waitlock:
+$(BINDIR)/waitlock: $(shell find src -name \*.c -o -name \*.h)
 	mkdir -p $(BINDIR) $(OBJDIR)
 	$(MAKE) -C src all BUILDDIR=../$(BUILDDIR) BINDIR=../$(BINDIR) OBJDIR=../$(OBJDIR)
 
