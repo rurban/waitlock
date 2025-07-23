@@ -62,12 +62,18 @@ distclean: clean
 	rm -rf autom4te.cache
 
 check: all
-	$(MAKE) -C src check BUILDDIR=../$(BUILDDIR) BINDIR=../$(BINDIR) OBJDIR=../$(OBJDIR)
+	-$(MAKE) -C src check BUILDDIR=../$(BUILDDIR) BINDIR=../$(BINDIR) OBJDIR=../$(OBJDIR)
+	test/core_functionality_test.sh
+	-test/comprehensive_test.sh
+	test/external_binary_test.sh
 
 test: check
 
 lint:
 	pre-commit run -a
+
+shellcheck:
+	shellcheck $(shell find . -name \*.sh)
 
 # Development targets
 debug: CFLAGS += -g -DDEBUG
@@ -76,4 +82,4 @@ debug: all
 dist: distclean
 	cd .. && tar czf $(PACKAGE)-$(VERSION).tar.gz $(PACKAGE)-$(VERSION)
 
-.PHONY: all install uninstall clean distclean check test lint debug dist
+.PHONY: all install uninstall clean distclean check test lint debug dist shellcheck
