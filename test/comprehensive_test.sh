@@ -289,7 +289,7 @@ if wait_for_process "donetest"; then
     if $WAITLOCK --lock-dir "$LOCK_DIR" --done donetest 2>/dev/null; then
         # Wait for process to exit
         sleep 2
-        
+
         if wait_for_process_gone "donetest"; then
             test_pass
         else
@@ -319,7 +319,7 @@ if [ "$sem_count" -eq 2 ]; then
     # Use --done to signal release of all semaphore slots
     if $WAITLOCK --lock-dir "$LOCK_DIR" --done donesem 2>/dev/null; then
         sleep 2
-        
+
         if wait_for_process_gone "donesem"; then
             test_pass
         else
@@ -333,7 +333,7 @@ if [ "$sem_count" -eq 2 ]; then
 else
     test_fail "Should have 2 semaphore holders before --done test"
     kill $DONE_SEM_PID1 $DONE_SEM_PID2 2>/dev/null || true
-}
+fi
 
 # Test 12: --done on non-existent lock
 test_start "DONE on non-existent lock"
