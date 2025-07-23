@@ -34,12 +34,13 @@ cleanup() {
     echo -e "\n${YELLOW}=== TEST SUMMARY ===${NC}"
     echo -e "Total tests: $TEST_COUNT"
     echo -e "${GREEN}Passed: $PASS_COUNT${NC}"
-    echo -e "${RED}Failed: $FAIL_COUNT${NC}"
 
     if [ $FAIL_COUNT -eq 0 ]; then
+        echo -e "${GREEN}Failed: $FAIL_COUNT${NC}"
         echo -e "\n${GREEN}All tests passed!${NC}"
         exit 0
     else
+        echo -e "${RED}Failed: $FAIL_COUNT${NC}"
         echo -e "\n${RED}Some tests failed!${NC}"
         exit 1
     fi
