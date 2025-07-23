@@ -106,22 +106,22 @@ int acquire_lock(const char *descriptor, int max_holders, double timeout) {
     bool contention_logged = FALSE;
     
     /* Find lock directory */
-    debug("DEBUG: Finding lock directory...");
+    debug("Finding lock directory...");
     lock_dir = find_lock_directory();
     if (!lock_dir) {
         error(E_NODIR, "Cannot find or create lock directory (tried: %s, %s, %s, %s)", 
               "/var/lock/waitlock", "/tmp/waitlock", "/tmp", "./waitlock");
         return E_NODIR;
     }
-    debug("DEBUG: Lock directory found: %s", lock_dir);
+    debug("Lock directory found: %s", lock_dir);
     
     /* Get hostname */
-    debug("DEBUG: Getting hostname...");
+    debug("Getting hostname...");
     if (gethostname(hostname, sizeof(hostname)) != 0) {
         safe_snprintf(hostname, sizeof(hostname), "unknown");
     }
     hostname[sizeof(hostname) - 1] = '\0';
-    debug("DEBUG: Hostname: %s", hostname);
+    debug("Hostname: %s", hostname);
     
     /* Prepare lock info */
     memset(&info, 0, sizeof(info));
@@ -140,15 +140,15 @@ int acquire_lock(const char *descriptor, int max_holders, double timeout) {
     info.descriptor[sizeof(info.descriptor) - 1] = '\0';
     
     /* Get command line */
-    debug("DEBUG: Getting command line...");
+    debug("Getting command line...");
     char *cmdline = get_process_cmdline(info.pid);
     if (cmdline) {
         strncpy(info.cmdline, cmdline, sizeof(info.cmdline) - 1);
     }
-    debug("DEBUG: Command line obtained");
+    debug("Command line obtained");
     
     /* Try to acquire lock */
-    debug("DEBUG: Starting lock acquisition...");
+    debug("Starting lock acquisition...");
     gettimeofday(&start_time, NULL);
     
     while (1) {
