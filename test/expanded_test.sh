@@ -24,25 +24,25 @@ FAIL_COUNT=0
 # Cleanup function
 cleanup() {
     echo -e "\n${YELLOW}Cleaning up...${NC}"
-    
+
     # Kill any remaining waitlock processes
     pkill -f "$WAITLOCK" 2>/dev/null || true
-    
+
     # Clean up test directory
     rm -rf "$TEST_DIR" 2>/dev/null || true
-    
+
     # Clean up any custom lock directories
     rm -rf "/tmp/custom_waitlock_$$" 2>/dev/null || true
-    
+
     # Restore environment
     unset WAITLOCK_DEBUG WAITLOCK_TIMEOUT WAITLOCK_DIR WAITLOCK_SLOT HOME
-    
+
     # Summary
     echo -e "\n${YELLOW}=== TEST SUMMARY ===${NC}"
     echo -e "Total tests: $TEST_COUNT"
     echo -e "${GREEN}Passed: $PASS_COUNT${NC}"
     echo -e "${RED}Failed: $FAIL_COUNT${NC}"
-    
+
     if [ $FAIL_COUNT -eq 0 ]; then
         echo -e "\n${GREEN}All tests passed!${NC}"
         exit 0
@@ -76,7 +76,7 @@ wait_for_process() {
     local desc="$1"
     local timeout=5
     local count=0
-    
+
     while [ $count -lt $timeout ]; do
         if $WAITLOCK --lock-dir "$LOCK_DIR" --list | grep -q "$desc"; then
             return 0
@@ -92,7 +92,7 @@ wait_for_process_gone() {
     local desc="$1"
     local timeout=5
     local count=0
-    
+
     while [ $count -lt $timeout ]; do
         if ! $WAITLOCK --lock-dir "$LOCK_DIR" --list | grep -q "$desc"; then
             return 0
@@ -146,7 +146,7 @@ fi
 
 # Test 2: Environment Variables - WAITLOCK_TIMEOUT
 test_start "Environment variable WAITLOCK_TIMEOUT"
-$WAITLOCK --lock-dir "$LOCK_DIR" envtimeout > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" envtimeout >/dev/null 2>&1 &
 ENV_PID=$!
 sleep 1
 
@@ -169,7 +169,7 @@ test_start "Environment variable WAITLOCK_DIR"
 CUSTOM_DIR="/tmp/custom_waitlock_$$"
 mkdir -p "$CUSTOM_DIR"
 
-WAITLOCK_DIR="$CUSTOM_DIR" $WAITLOCK envdir > /dev/null 2>&1 &
+WAITLOCK_DIR="$CUSTOM_DIR" $WAITLOCK envdir >/dev/null 2>&1 &
 ENV_DIR_PID=$!
 sleep 1
 
@@ -185,7 +185,7 @@ rm -rf "$CUSTOM_DIR"
 
 # Test 4: Environment Variables - WAITLOCK_SLOT
 test_start "Environment variable WAITLOCK_SLOT"
-WAITLOCK_SLOT=2 $WAITLOCK --lock-dir "$LOCK_DIR" -m 5 envslot > /dev/null 2>&1 &
+WAITLOCK_SLOT=2 $WAITLOCK --lock-dir "$LOCK_DIR" -m 5 envslot >/dev/null 2>&1 &
 ENV_SLOT_PID=$!
 sleep 1
 
@@ -204,7 +204,7 @@ test_start "HOME environment variable fallback"
 TEMP_HOME="/tmp/testhome_$$"
 mkdir -p "$TEMP_HOME"
 
-HOME="$TEMP_HOME" $WAITLOCK hometest > /dev/null 2>&1 &
+HOME="$TEMP_HOME" $WAITLOCK hometest >/dev/null 2>&1 &
 HOME_PID=$!
 sleep 1
 
@@ -228,7 +228,7 @@ fi
 
 # Test 7: CPU-based locking (--onePerCPU)
 test_start "CPU-based locking (--onePerCPU)"
-$WAITLOCK --lock-dir "$LOCK_DIR" --onePerCPU cpulock > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" --onePerCPU cpulock >/dev/null 2>&1 &
 CPU_PID=$!
 sleep 1
 
@@ -244,7 +244,7 @@ wait $CPU_PID 2>/dev/null || true
 
 # Test 8: CPU exclusion (--excludeCPUs)
 test_start "CPU exclusion (--excludeCPUs)"
-$WAITLOCK --lock-dir "$LOCK_DIR" --onePerCPU --excludeCPUs 1 cpuexclude > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" --onePerCPU --excludeCPUs 1 cpuexclude >/dev/null 2>&1 &
 CPU_EXCLUDE_PID=$!
 sleep 1
 
@@ -259,7 +259,7 @@ wait $CPU_EXCLUDE_PID 2>/dev/null || true
 
 # Test 9: Stdin input for descriptor
 test_start "Stdin input for descriptor"
-echo "stdintest" | $WAITLOCK --lock-dir "$LOCK_DIR" > /dev/null 2>&1 &
+echo "stdintest" | $WAITLOCK --lock-dir "$LOCK_DIR" >/dev/null 2>&1 &
 STDIN_PID=$!
 sleep 1
 
@@ -291,7 +291,7 @@ fi
 
 # Test 12: Syslog functionality
 test_start "Syslog functionality"
-$WAITLOCK --lock-dir "$LOCK_DIR" --syslog syslogtest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" --syslog syslogtest >/dev/null 2>&1 &
 SYSLOG_PID=$!
 sleep 1
 
@@ -307,7 +307,7 @@ wait $SYSLOG_PID 2>/dev/null || true
 
 # Test 13: Syslog facility
 test_start "Syslog facility"
-$WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility local0 facilitytest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility local0 facilitytest >/dev/null 2>&1 &
 FACILITY_PID=$!
 sleep 1
 
@@ -323,7 +323,7 @@ wait $FACILITY_PID 2>/dev/null || true
 # Test 14: Lock directory creation
 test_start "Lock directory creation"
 NONEXISTENT_DIR="/tmp/nonexistent_$$"
-$WAITLOCK --lock-dir "$NONEXISTENT_DIR" dircreate > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$NONEXISTENT_DIR" dircreate >/dev/null 2>&1 &
 DIR_PID=$!
 sleep 1
 
@@ -353,11 +353,11 @@ rm -rf "$READONLY_DIR"
 
 # Test 16: Concurrent semaphore with preferred slots
 test_start "Concurrent semaphore with preferred slots"
-WAITLOCK_SLOT=0 $WAITLOCK --lock-dir "$LOCK_DIR" -m 3 slottest > /dev/null 2>&1 &
+WAITLOCK_SLOT=0 $WAITLOCK --lock-dir "$LOCK_DIR" -m 3 slottest >/dev/null 2>&1 &
 SLOT0_PID=$!
-WAITLOCK_SLOT=1 $WAITLOCK --lock-dir "$LOCK_DIR" -m 3 slottest > /dev/null 2>&1 &
+WAITLOCK_SLOT=1 $WAITLOCK --lock-dir "$LOCK_DIR" -m 3 slottest >/dev/null 2>&1 &
 SLOT1_PID=$!
-WAITLOCK_SLOT=2 $WAITLOCK --lock-dir "$LOCK_DIR" -m 3 slottest > /dev/null 2>&1 &
+WAITLOCK_SLOT=2 $WAITLOCK --lock-dir "$LOCK_DIR" -m 3 slottest >/dev/null 2>&1 &
 SLOT2_PID=$!
 
 sleep 2
@@ -375,7 +375,7 @@ wait $SLOT0_PID $SLOT1_PID $SLOT2_PID 2>/dev/null || true
 
 # Test 17: Stale lock detection
 test_start "Stale lock detection"
-$WAITLOCK --lock-dir "$LOCK_DIR" staletest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" staletest >/dev/null 2>&1 &
 STALE_PID=$!
 sleep 1
 
@@ -399,7 +399,7 @@ fi
 
 # Test 19: Binary vs text lock file format
 test_start "Binary vs text lock file format"
-$WAITLOCK --lock-dir "$LOCK_DIR" formattest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" formattest >/dev/null 2>&1 &
 FORMAT_PID=$!
 sleep 1
 
@@ -416,7 +416,7 @@ wait $FORMAT_PID 2>/dev/null || true
 
 # Test 20: Signal handling (SIGTERM)
 test_start "Signal handling (SIGTERM)"
-$WAITLOCK --lock-dir "$LOCK_DIR" sigtest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" sigtest >/dev/null 2>&1 &
 SIG_PID=$!
 sleep 1
 
@@ -432,7 +432,7 @@ fi
 
 # Test 21: Output formats (CSV)
 test_start "Output formats (CSV)"
-$WAITLOCK --lock-dir "$LOCK_DIR" csvtest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" csvtest >/dev/null 2>&1 &
 CSV_PID=$!
 sleep 1
 
@@ -448,7 +448,7 @@ wait $CSV_PID 2>/dev/null || true
 
 # Test 22: Output formats (NULL)
 test_start "Output formats (NULL)"
-$WAITLOCK --lock-dir "$LOCK_DIR" nulltest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" nulltest >/dev/null 2>&1 &
 NULL_PID=$!
 sleep 1
 
@@ -475,9 +475,9 @@ fi
 
 # Test 24: Multiple --done commands
 test_start "Multiple --done commands"
-$WAITLOCK --lock-dir "$LOCK_DIR" -m 2 multitest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" -m 2 multitest >/dev/null 2>&1 &
 MULTI1_PID=$!
-$WAITLOCK --lock-dir "$LOCK_DIR" -m 2 multitest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" -m 2 multitest >/dev/null 2>&1 &
 MULTI2_PID=$!
 sleep 1
 

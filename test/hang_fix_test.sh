@@ -35,17 +35,17 @@ test_no_hang() {
     local test_name="$1"
     local timeout_val="$2"
     local max_time="$3"
-    
+
     echo -e "\n${YELLOW}Testing: $test_name${NC}"
     echo "Command: $WAITLOCK --lock-dir '$TEST_DIR' --timeout $timeout_val test_hang"
     echo "Max allowed time: ${max_time}s"
-    
+
     start_time=$(date +%s)
-    
+
     # Start the command in background
     $WAITLOCK --lock-dir "$TEST_DIR" --timeout "$timeout_val" test_hang &
     local bg_pid=$!
-    
+
     # Wait for either the timeout or the process to exit
     local elapsed=0
     while [ $elapsed -lt $max_time ] && kill -0 $bg_pid 2>/dev/null; do
@@ -55,10 +55,10 @@ test_no_hang() {
             break
         fi
     done
-    
+
     end_time=$(date +%s)
     duration=$((end_time - start_time))
-    
+
     if kill -0 $bg_pid 2>/dev/null; then
         # Process is still running - this is expected for successful lock acquisition
         echo -e "${GREEN}PASS: Lock acquired successfully (process running after ${duration}s)${NC}"
@@ -84,7 +84,7 @@ test_no_hang() {
 echo -e "\n${YELLOW}=== Test 1: Short timeout no-contention ====${NC}"
 test_no_hang "Short timeout no-contention" "0.1" "0.5"
 
-# Test 2: Zero timeout in no-contention scenario  
+# Test 2: Zero timeout in no-contention scenario
 # This should acquire immediately or timeout immediately (not hang)
 echo -e "\n${YELLOW}=== Test 2: Zero timeout no-contention ====${NC}"
 test_no_hang "Zero timeout no-contention" "0.01" "0.2"
@@ -94,7 +94,7 @@ echo -e "\n${YELLOW}=== Test 3: Timeout with contention ====${NC}"
 echo "Starting holder process..."
 $WAITLOCK --lock-dir "$TEST_DIR" --timeout 10 test_contention &
 holder_pid=$!
-sleep 0.5  # Let it acquire the lock
+sleep 0.5 # Let it acquire the lock
 
 echo "Testing timeout with contention..."
 start_time=$(date +%s)

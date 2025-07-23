@@ -113,7 +113,7 @@ START_TIME=$(date +%s)
 if ! $WAITLOCK --lock-dir "$LOCK_DIR" --onePerCPU --timeout 2 onecpu_timeout >/dev/null 2>&1; then
     END_TIME=$(date +%s)
     DURATION=$((END_TIME - START_TIME))
-    
+
     if [ $DURATION -ge 2 ] && [ $DURATION -le 4 ]; then
         test_pass "OnePerCPU respects timeout"
     else
@@ -158,7 +158,7 @@ sleep 1
 if wait_for_lock "onecpu_exec"; then
     # Wait for completion
     wait $ONECPU_EXEC_PID 2>/dev/null || true
-    
+
     # Should release lock
     if wait_for_unlock "onecpu_exec"; then
         test_pass "OnePerCPU works with exec"

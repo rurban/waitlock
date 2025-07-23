@@ -44,17 +44,15 @@ echo -e "\n${BLUE}=== CPU-BASED LOCKING OPTIONS ===${NC}"
 
 test_start "onePerCPU option"
 cleanup
-if timeout 3 $WAITLOCK --onePerCPU ui_test_percpu >/dev/null 2>&1 &
-then
+if timeout 3 $WAITLOCK --onePerCPU ui_test_percpu >/dev/null 2>&1 & then
     test_pass "onePerCPU option works"
 else
     test_fail "onePerCPU option failed"
 fi
 
 test_start "excludeCPUs option"
-cleanup  
-if timeout 3 $WAITLOCK --excludeCPUs 1 ui_test_exclude >/dev/null 2>&1 &
-then
+cleanup
+if timeout 3 $WAITLOCK --excludeCPUs 1 ui_test_exclude >/dev/null 2>&1 & then
     test_pass "excludeCPUs option works"
 else
     test_fail "excludeCPUs option failed"
@@ -62,8 +60,7 @@ fi
 
 test_start "onePerCPU + excludeCPUs combination"
 cleanup
-if timeout 3 $WAITLOCK --onePerCPU --excludeCPUs 1 ui_test_combo1 >/dev/null 2>&1 &
-then
+if timeout 3 $WAITLOCK --onePerCPU --excludeCPUs 1 ui_test_combo1 >/dev/null 2>&1 & then
     test_pass "onePerCPU + excludeCPUs combination works"
 else
     test_fail "onePerCPU + excludeCPUs combination failed"
@@ -73,8 +70,7 @@ echo -e "\n${BLUE}=== OUTPUT CONTROL OPTIONS ===${NC}"
 
 test_start "Quiet option (-q)"
 cleanup
-if timeout 3 $WAITLOCK -q ui_test_quiet_short >/dev/null 2>&1 &
-then
+if timeout 3 $WAITLOCK -q ui_test_quiet_short >/dev/null 2>&1 & then
     test_pass "Quiet short flag works"
 else
     test_fail "Quiet short flag failed"
@@ -82,8 +78,7 @@ fi
 
 test_start "Quiet option (--quiet)"
 cleanup
-if timeout 3 $WAITLOCK --quiet ui_test_quiet_long >/dev/null 2>&1 &
-then
+if timeout 3 $WAITLOCK --quiet ui_test_quiet_long >/dev/null 2>&1 & then
     test_pass "Quiet long flag works"
 else
     test_fail "Quiet long flag failed"
@@ -91,17 +86,15 @@ fi
 
 test_start "Verbose option (-v)"
 cleanup
-if timeout 3 $WAITLOCK -v ui_test_verbose_short >/dev/null 2>&1 &
-then
+if timeout 3 $WAITLOCK -v ui_test_verbose_short >/dev/null 2>&1 & then
     test_pass "Verbose short flag works"
 else
     test_fail "Verbose short flag failed"
 fi
 
-test_start "Verbose option (--verbose)"  
+test_start "Verbose option (--verbose)"
 cleanup
-if timeout 3 $WAITLOCK --verbose ui_test_verbose_long >/dev/null 2>&1 &
-then
+if timeout 3 $WAITLOCK --verbose ui_test_verbose_long >/dev/null 2>&1 & then
     test_pass "Verbose long flag works"
 else
     test_fail "Verbose long flag failed"
@@ -113,8 +106,7 @@ test_start "Lock directory option (-d)"
 TEMP_DIR="/tmp/waitlock_ui_test_$$"
 mkdir -p "$TEMP_DIR"
 cleanup
-if timeout 3 $WAITLOCK -d "$TEMP_DIR" ui_test_dir_short >/dev/null 2>&1 &
-then
+if timeout 3 $WAITLOCK -d "$TEMP_DIR" ui_test_dir_short >/dev/null 2>&1 & then
     test_pass "Lock directory short flag works"
 else
     test_fail "Lock directory short flag failed"
@@ -123,10 +115,9 @@ rm -rf "$TEMP_DIR"
 
 test_start "Lock directory option (--lock-dir)"
 TEMP_DIR="/tmp/waitlock_ui_test_$$"
-mkdir -p "$TEMP_DIR" 
+mkdir -p "$TEMP_DIR"
 cleanup
-if timeout 3 $WAITLOCK --lock-dir "$TEMP_DIR" ui_test_dir_long >/dev/null 2>&1 &
-then
+if timeout 3 $WAITLOCK --lock-dir "$TEMP_DIR" ui_test_dir_long >/dev/null 2>&1 & then
     test_pass "Lock directory long flag works"
 else
     test_fail "Lock directory long flag failed"
@@ -135,8 +126,7 @@ rm -rf "$TEMP_DIR"
 
 test_start "Syslog option (--syslog)"
 cleanup
-if timeout 3 $WAITLOCK --syslog ui_test_syslog >/dev/null 2>&1 &
-then
+if timeout 3 $WAITLOCK --syslog ui_test_syslog >/dev/null 2>&1 & then
     test_pass "Syslog flag works"
 else
     test_fail "Syslog flag failed"
@@ -144,8 +134,7 @@ fi
 
 test_start "Syslog facility option"
 cleanup
-if timeout 3 $WAITLOCK --syslog --syslog-facility daemon ui_test_facility >/dev/null 2>&1 &
-then
+if timeout 3 $WAITLOCK --syslog --syslog-facility daemon ui_test_facility >/dev/null 2>&1 & then
     test_pass "Syslog facility option works"
 else
     test_fail "Syslog facility option failed"
@@ -183,7 +172,7 @@ fi
 
 test_start "List with --stale-only option"
 if $WAITLOCK --list --stale-only >/dev/null 2>&1; then
-    test_pass "List --stale-only works" 
+    test_pass "List --stale-only works"
 else
     test_fail "List --stale-only failed"
 fi
@@ -215,8 +204,7 @@ echo -e "\n${BLUE}=== COMPLEX COMBINATIONS ===${NC}"
 
 test_start "Complex valid combination"
 cleanup
-if timeout 3 $WAITLOCK --timeout 2.0 --allowMultiple 2 --verbose ui_test_complex >/dev/null 2>&1 &
-then
+if timeout 3 $WAITLOCK --timeout 2.0 --allowMultiple 2 --verbose ui_test_complex >/dev/null 2>&1 & then
     test_pass "Complex combination works"
 else
     test_fail "Complex combination failed"

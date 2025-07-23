@@ -23,19 +23,19 @@ FAIL_COUNT=0
 # Cleanup function
 cleanup() {
     echo -e "\n${YELLOW}Cleaning up...${NC}"
-    
+
     # Kill any remaining waitlock processes
     pkill -f "$WAITLOCK" 2>/dev/null || true
-    
+
     # Clean up test directory
     rm -rf "$TEST_DIR" 2>/dev/null || true
-    
+
     # Summary
     echo -e "\n${YELLOW}=== TEST SUMMARY ===${NC}"
     echo -e "Total tests: $TEST_COUNT"
     echo -e "${GREEN}Passed: $PASS_COUNT${NC}"
     echo -e "${RED}Failed: $FAIL_COUNT${NC}"
-    
+
     if [ $FAIL_COUNT -eq 0 ]; then
         echo -e "\n${GREEN}All tests passed!${NC}"
         exit 0
@@ -69,7 +69,7 @@ wait_for_process() {
     local desc="$1"
     local timeout=5
     local count=0
-    
+
     while [ $count -lt $timeout ]; do
         if $WAITLOCK --list | grep -q "$desc"; then
             return 0
@@ -85,7 +85,7 @@ wait_for_process_gone() {
     local desc="$1"
     local timeout=5
     local count=0
-    
+
     while [ $count -lt $timeout ]; do
         if ! $WAITLOCK --list | grep -q "$desc"; then
             return 0
@@ -153,7 +153,7 @@ fi
 # Test 4: Basic mutex lock acquisition and release
 test_start "Basic mutex lock (acquire and kill)"
 mkdir -p "$LOCK_DIR"
-$WAITLOCK --lock-dir "$LOCK_DIR" basicmutex > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" basicmutex >/dev/null 2>&1 &
 LOCK_PID=$!
 
 sleep 1
@@ -167,7 +167,7 @@ if wait_for_process "basicmutex"; then
         # Kill the process and verify lock is released
         kill $LOCK_PID
         sleep 1
-        
+
         if wait_for_process_gone "basicmutex"; then
             test_pass
         else
@@ -181,11 +181,11 @@ fi
 # Test 5: Semaphore with multiple holders
 test_start "Semaphore with 3 holders"
 mkdir -p "$LOCK_DIR"
-$WAITLOCK --lock-dir "$LOCK_DIR" -m 3 semtest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" -m 3 semtest >/dev/null 2>&1 &
 PID1=$!
-$WAITLOCK --lock-dir "$LOCK_DIR" -m 3 semtest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" -m 3 semtest >/dev/null 2>&1 &
 PID2=$!
-$WAITLOCK --lock-dir "$LOCK_DIR" -m 3 semtest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" -m 3 semtest >/dev/null 2>&1 &
 PID3=$!
 
 sleep 2
@@ -196,7 +196,7 @@ if [ "$sem_count" -eq 3 ]; then
     # Kill all processes
     kill $PID1 $PID2 $PID3
     sleep 1
-    
+
     if wait_for_process_gone "semtest"; then
         test_pass
     else
@@ -218,7 +218,7 @@ fi
 
 # Test 7: Timeout functionality
 test_start "Timeout functionality"
-$WAITLOCK --lock-dir "$LOCK_DIR" timeouttest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" timeouttest >/dev/null 2>&1 &
 TIMEOUT_PID=$!
 
 sleep 1
@@ -241,7 +241,7 @@ kill $TIMEOUT_PID 2>/dev/null || true
 
 # Test 8: Output formats
 test_start "Output formats (CSV and NULL)"
-$WAITLOCK --lock-dir "$LOCK_DIR" formattest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" formattest >/dev/null 2>&1 &
 FORMAT_PID=$!
 
 sleep 1
@@ -259,7 +259,7 @@ kill $FORMAT_PID 2>/dev/null || true
 # Test 9: Stale lock detection
 test_start "Stale lock detection"
 # Create a fake stale lock by starting a process and killing it without cleanup
-$WAITLOCK --lock-dir "$LOCK_DIR" staletest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" staletest >/dev/null 2>&1 &
 STALE_PID=$!
 
 sleep 1
@@ -278,7 +278,7 @@ fi
 
 # Test 10: --done functionality (NEW!)
 test_start "DONE functionality - Basic mutex"
-$WAITLOCK --lock-dir "$LOCK_DIR" donetest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" donetest >/dev/null 2>&1 &
 DONE_PID=$!
 
 sleep 1
@@ -306,9 +306,9 @@ fi
 
 # Test 11: --done functionality with semaphore
 test_start "DONE functionality - Semaphore"
-$WAITLOCK --lock-dir "$LOCK_DIR" -m 2 donesem > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" -m 2 donesem >/dev/null 2>&1 &
 DONE_SEM_PID1=$!
-$WAITLOCK --lock-dir "$LOCK_DIR" -m 2 donesem > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" -m 2 donesem >/dev/null 2>&1 &
 DONE_SEM_PID2=$!
 
 sleep 1
@@ -349,7 +349,7 @@ export WAITLOCK_DEBUG=1
 verbose_output=$($WAITLOCK --lock-dir "$LOCK_DIR" --verbose --list 2>&1)
 unset WAITLOCK_DEBUG
 
-$WAITLOCK --lock-dir "$LOCK_DIR" verbosetest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" verbosetest >/dev/null 2>&1 &
 VERBOSE_PID=$!
 
 sleep 1
@@ -367,7 +367,7 @@ fi
 # Test 14: Directory creation and permissions
 test_start "Custom lock directory"
 CUSTOM_DIR="/tmp/custom_waitlock_$$"
-$WAITLOCK --lock-dir "$CUSTOM_DIR" customdirtest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$CUSTOM_DIR" customdirtest >/dev/null 2>&1 &
 CUSTOM_PID=$!
 
 sleep 1

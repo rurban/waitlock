@@ -41,9 +41,9 @@ fi
 # Test help output contains key sections
 test_start "Help output completeness"
 HELP_OUTPUT=$($WAITLOCK --help 2>&1)
-if echo "$HELP_OUTPUT" | grep -q -i "usage" && \
-   echo "$HELP_OUTPUT" | grep -q -i "options" && \
-   echo "$HELP_OUTPUT" | grep -q -i "examples"; then
+if echo "$HELP_OUTPUT" | grep -q -i "usage" &&
+    echo "$HELP_OUTPUT" | grep -q -i "options" &&
+    echo "$HELP_OUTPUT" | grep -q -i "examples"; then
     test_pass "Help output contains required sections"
 else
     test_fail "Help output missing required sections"

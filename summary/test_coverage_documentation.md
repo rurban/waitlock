@@ -15,13 +15,13 @@
 - ✅ **Basic argument parsing**: Descriptor handling, validation
 - ✅ **Mode options**: `--check`, `--done`, `--list`, `--exec`
 - ✅ **Semaphore options**: `-m/--allowMultiple` with validation
-- ✅ **Timeout options**: `-t/--timeout` with validation  
+- ✅ **Timeout options**: `-t/--timeout` with validation
 - ✅ **Invalid argument rejection**: Proper error handling
 - ✅ **Syslog facility parsing**: All valid facilities tested
 
 #### Extended Options Testing (Newly Verified)
 - ✅ **CPU-based locking**: `--onePerCPU`, `--excludeCPUs`
-- ✅ **Output control**: `-q/--quiet`, `-v/--verbose` 
+- ✅ **Output control**: `-q/--quiet`, `-v/--verbose`
 - ✅ **Directory options**: `-d/--lock-dir`
 - ✅ **Syslog options**: `--syslog`, `--syslog-facility`
 - ✅ **List formatting**: `--format` (human, csv, null)
@@ -32,7 +32,7 @@
 
 #### Environment Variables (`test/test_core.c`)
 - ✅ **WAITLOCK_DEBUG**: Debug output control
-- ✅ **WAITLOCK_TIMEOUT**: Default timeout setting  
+- ✅ **WAITLOCK_TIMEOUT**: Default timeout setting
 - ✅ **WAITLOCK_DIR**: Lock directory override
 - ✅ **WAITLOCK_SLOT**: Slot preference
 
@@ -103,7 +103,7 @@ The test suite provides comprehensive validation of WaitLock's functionality and
 ### Handoff Status
 This project is **ready for handoff** to other teams with:
 - ✅ **Functional test infrastructure**
-- ✅ **Comprehensive option coverage**  
+- ✅ **Comprehensive option coverage**
 - ✅ **Clear documentation of current state**
 - ✅ **Minimal remaining work items**
 

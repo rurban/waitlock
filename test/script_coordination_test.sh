@@ -27,20 +27,20 @@ FAIL_COUNT=0
 # Cleanup function
 cleanup() {
     echo -e "\n${YELLOW}Cleaning up coordination tests...${NC}"
-    
+
     # Kill any remaining processes
     pkill -f "test_worker_script" 2>/dev/null || true
     pkill -f "$WAITLOCK" 2>/dev/null || true
-    
+
     # Clean up test directory
     rm -rf "$TEST_DIR" 2>/dev/null || true
-    
+
     # Summary
     echo -e "\n${YELLOW}=== SCRIPT COORDINATION TEST SUMMARY ===${NC}"
     echo -e "Total tests: $TEST_COUNT"
     echo -e "${GREEN}Passed: $PASS_COUNT${NC}"
     echo -e "${RED}Failed: $FAIL_COUNT${NC}"
-    
+
     if [ $FAIL_COUNT -eq 0 ]; then
         echo -e "\n${GREEN}All script coordination tests passed!${NC}"
         exit 0
@@ -74,8 +74,8 @@ create_test_worker() {
     local script_name="$1"
     local log_file="$2"
     local work_duration="$3"
-    
-    cat > "$script_name" << EOF
+
+    cat >"$script_name" <<EOF
 #!/bin/bash
 echo "[\$(date '+%H:%M:%S.%3N')] Script starting" >> "$log_file"
 
@@ -94,16 +94,16 @@ echo "[\$(date '+%H:%M:%S.%3N')] Lock holder: \$lock_holder, Our PID: \$LOCK_PID
 
 if [ "\$lock_holder" = "\$LOCK_PID" ]; then
     echo "[\$(date '+%H:%M:%S.%3N')] SUCCESS: Got the lock! Proceeding with work..." >> "$log_file"
-    
+
     # Log start of critical work
     echo "[\$(date '+%H:%M:%S.%3N')] WORK_START" >> "$WORK_LOG"
-    
+
     # Simulate critical work
     sleep $work_duration
-    
+
     # Log end of critical work
     echo "[\$(date '+%H:%M:%S.%3N')] WORK_END" >> "$WORK_LOG"
-    
+
     echo "[\$(date '+%H:%M:%S.%3N')] Work complete, releasing lock" >> "$log_file"
     kill \$LOCK_PID
     wait \$LOCK_PID 2>/dev/null || true
@@ -140,9 +140,9 @@ echo -e "${GREEN}Setup complete!${NC}"
 
 # Test 1: Sequential execution (should both succeed)
 test_start "Sequential execution - both scripts should succeed"
-> "$WORK_LOG"
-> "$SCRIPT1_LOG"
-> "$SCRIPT2_LOG"
+>"$WORK_LOG"
+>"$SCRIPT1_LOG"
+>"$SCRIPT2_LOG"
 
 create_test_worker "$TEST_DIR/script1.sh" "$SCRIPT1_LOG" 2
 create_test_worker "$TEST_DIR/script2.sh" "$SCRIPT2_LOG" 2
@@ -167,9 +167,9 @@ fi
 
 # Test 2: Simultaneous execution (one should succeed, one should fail or wait)
 test_start "Simultaneous execution - coordination test"
-> "$WORK_LOG"
-> "$SCRIPT1_LOG"
-> "$SCRIPT2_LOG"
+>"$WORK_LOG"
+>"$SCRIPT1_LOG"
+>"$SCRIPT2_LOG"
 
 create_test_worker "$TEST_DIR/script1.sh" "$SCRIPT1_LOG" 3
 create_test_worker "$TEST_DIR/script2.sh" "$SCRIPT2_LOG" 3
@@ -202,7 +202,7 @@ if [ $work_starts -gt 0 ] && [ $work_ends -gt 0 ]; then
     if [ $work_starts -eq $work_ends ]; then
         # Check for proper coordination (no overlapping work)
         overlap_detected=false
-        
+
         # Extract timestamps and check for overlaps
         # This is a simplified check - in a real scenario you'd do more sophisticated timing analysis
         if [ $work_starts -eq 1 ]; then
@@ -226,9 +226,9 @@ fi
 
 # Test 3: Rapid succession (test queueing behavior)
 test_start "Rapid succession - queueing behavior"
-> "$WORK_LOG"
-> "$SCRIPT1_LOG"
-> "$SCRIPT2_LOG"
+>"$WORK_LOG"
+>"$SCRIPT1_LOG"
+>"$SCRIPT2_LOG"
 
 create_test_worker "$TEST_DIR/script1.sh" "$SCRIPT1_LOG" 1
 create_test_worker "$TEST_DIR/script2.sh" "$SCRIPT2_LOG" 1
@@ -258,8 +258,8 @@ fi
 
 # Test 4: Lock release verification
 test_start "Lock release verification"
-> "$WORK_LOG"
-> "$SCRIPT1_LOG"
+>"$WORK_LOG"
+>"$SCRIPT1_LOG"
 
 create_test_worker "$TEST_DIR/script1.sh" "$SCRIPT1_LOG" 1
 

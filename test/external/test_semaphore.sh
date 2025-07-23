@@ -148,7 +148,7 @@ else
     test_fail "Zero semaphore value should be rejected"
 fi
 
-# Test with negative value  
+# Test with negative value
 if ! $WAITLOCK --lock-dir "$LOCK_DIR" -m -1 negative_sem >/dev/null 2>&1; then
     test_pass "Negative semaphore value rejected"
 else

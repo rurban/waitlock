@@ -152,7 +152,7 @@ kill $FRESH_PID 2>/dev/null || true
 # Final summary
 echo -e "\n${BLUE}=== TEST SUMMARY ===${NC}"
 echo -e "Test 1 (No conflict):     $RESULT1"
-echo -e "Test 2 (With conflict):   $RESULT2"  
+echo -e "Test 2 (With conflict):   $RESULT2"
 echo -e "Test 3 (Zero timeout):    $RESULT3"
 echo -e "Test 4 (Fresh descriptor): $RESULT4"
 

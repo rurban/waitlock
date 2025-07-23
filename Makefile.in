@@ -66,6 +66,9 @@ check: all
 
 test: check
 
+lint:
+	pre-commit run -a
+
 # Development targets
 debug: CFLAGS += -g -DDEBUG
 debug: all
@@ -73,4 +76,4 @@ debug: all
 dist: distclean
 	cd .. && tar czf $(PACKAGE)-$(VERSION).tar.gz $(PACKAGE)-$(VERSION)
 
-.PHONY: all install uninstall clean distclean check test debug dist
+.PHONY: all install uninstall clean distclean check test lint debug dist

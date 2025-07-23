@@ -44,7 +44,7 @@ else
     test_fail "onePerCPU option rejected"
 fi
 
-# Test 2: excludeCPUs option  
+# Test 2: excludeCPUs option
 test_start "excludeCPUs option parsing"
 if timeout 3 $WAITLOCK --excludeCPUs 1 gap_test_exclude >/dev/null 2>&1; then
     test_pass "excludeCPUs option accepted"
@@ -163,7 +163,7 @@ else
 fi
 
 if $WAITLOCK --version --timeout 30 >/dev/null 2>&1; then
-    test_pass "Version with options works"  
+    test_pass "Version with options works"
 else
     test_fail "Version with options failed"
 fi

@@ -24,19 +24,19 @@ FAIL_COUNT=0
 # Cleanup function
 cleanup() {
     echo -e "\n${YELLOW}Cleaning up...${NC}"
-    
+
     # Kill any remaining waitlock processes
     pkill -f "$WAITLOCK" 2>/dev/null || true
-    
+
     # Clean up test directory
     rm -rf "$TEST_DIR" 2>/dev/null || true
-    
+
     # Summary
     echo -e "\n${YELLOW}=== CORE FUNCTIONALITY TEST SUMMARY ===${NC}"
     echo -e "Total tests: $TEST_COUNT"
     echo -e "${GREEN}Passed: $PASS_COUNT${NC}"
     echo -e "${RED}Failed: $FAIL_COUNT${NC}"
-    
+
     if [ $FAIL_COUNT -eq 0 ]; then
         echo -e "\n${GREEN}All core functionality tests passed!${NC}"
         exit 0
@@ -70,7 +70,7 @@ wait_for_process() {
     local desc="$1"
     local timeout=5
     local count=0
-    
+
     while [ $count -lt $timeout ]; do
         if $WAITLOCK --lock-dir "$LOCK_DIR" --list | grep -q "$desc"; then
             return 0
@@ -86,7 +86,7 @@ wait_for_process_gone() {
     local desc="$1"
     local timeout=5
     local count=0
-    
+
     while [ $count -lt $timeout ]; do
         if ! $WAITLOCK --lock-dir "$LOCK_DIR" --list | grep -q "$desc"; then
             return 0
@@ -127,7 +127,7 @@ fi
 
 # Test 2: Basic mutex lock
 test_start "Basic mutex lock acquisition"
-$WAITLOCK --lock-dir "$LOCK_DIR" basicmutex > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" basicmutex >/dev/null 2>&1 &
 MUTEX_PID=$!
 sleep 1
 
@@ -142,7 +142,7 @@ wait $MUTEX_PID 2>/dev/null || true
 
 # Test 3: --done functionality
 test_start "--done functionality"
-$WAITLOCK --lock-dir "$LOCK_DIR" donetest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" donetest >/dev/null 2>&1 &
 DONE_PID=$!
 sleep 1
 
@@ -167,9 +167,9 @@ wait $DONE_PID 2>/dev/null || true
 
 # Test 4: Basic semaphore
 test_start "Basic semaphore functionality"
-$WAITLOCK --lock-dir "$LOCK_DIR" -m 2 semtest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" -m 2 semtest >/dev/null 2>&1 &
 SEM1_PID=$!
-$WAITLOCK --lock-dir "$LOCK_DIR" -m 2 semtest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" -m 2 semtest >/dev/null 2>&1 &
 SEM2_PID=$!
 sleep 2
 
@@ -185,9 +185,9 @@ wait $SEM1_PID $SEM2_PID 2>/dev/null || true
 
 # Test 5: --done with semaphore
 test_start "--done with semaphore"
-$WAITLOCK --lock-dir "$LOCK_DIR" -m 2 donesem > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" -m 2 donesem >/dev/null 2>&1 &
 DONE_SEM1_PID=$!
-$WAITLOCK --lock-dir "$LOCK_DIR" -m 2 donesem > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" -m 2 donesem >/dev/null 2>&1 &
 DONE_SEM2_PID=$!
 sleep 1
 
@@ -207,7 +207,7 @@ wait $DONE_SEM1_PID $DONE_SEM2_PID 2>/dev/null || true
 
 # Test 6: Lock listing
 test_start "Lock listing functionality"
-$WAITLOCK --lock-dir "$LOCK_DIR" listtest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" listtest >/dev/null 2>&1 &
 LIST_PID=$!
 sleep 1
 
@@ -223,7 +223,7 @@ wait $LIST_PID 2>/dev/null || true
 
 # Test 7: Check functionality
 test_start "Check functionality"
-$WAITLOCK --lock-dir "$LOCK_DIR" checktest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" checktest >/dev/null 2>&1 &
 CHECK_PID=$!
 sleep 1
 
@@ -247,7 +247,7 @@ fi
 
 # Test 9: Timeout functionality
 test_start "Timeout functionality"
-$WAITLOCK --lock-dir "$LOCK_DIR" timeouttest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" timeouttest >/dev/null 2>&1 &
 TIMEOUT_PID=$!
 sleep 1
 
@@ -276,7 +276,7 @@ fi
 
 # Test 11: Signal handling
 test_start "Signal handling (SIGTERM)"
-$WAITLOCK --lock-dir "$LOCK_DIR" sigtest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" sigtest >/dev/null 2>&1 &
 SIG_PID=$!
 sleep 1
 
@@ -291,7 +291,7 @@ fi
 
 # Test 12: Lock cleanup on process death
 test_start "Lock cleanup on process death"
-$WAITLOCK --lock-dir "$LOCK_DIR" cleanuptest > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" cleanuptest >/dev/null 2>&1 &
 CLEANUP_PID=$!
 sleep 1
 

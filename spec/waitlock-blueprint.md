@@ -22,12 +22,12 @@ WaitLock is a portable UNIX/POSIX command-line tool that provides mutex and sema
 Tool WaitLock {
   name: "waitlock",
   version: "1.0.0",
-  
+
   Commands {
     primary_usage: "waitlock [options] <descriptor>",
     stdin_usage: "echo <descriptor> | waitlock [options]",
     management_usage: "waitlock --list [options]",
-    
+
     CoreOptions [
       {
         flag: "--allowMultiple, -m",
@@ -62,7 +62,7 @@ Tool WaitLock {
         description: "Execute command while holding lock"
       }
     ],
-    
+
     OutputOptions [
       {
         flag: "--quiet, -q",
@@ -90,7 +90,7 @@ Tool WaitLock {
         description: "Syslog facility (daemon|local0-7)"
       }
     ],
-    
+
     ManagementOptions [
       {
         flag: "--list, -l",
@@ -105,7 +105,7 @@ Tool WaitLock {
         description: "With --list, show only stale locks"
       }
     ],
-    
+
     ConfigurationOptions [
       {
         flag: "--lock-dir, -d",
@@ -136,13 +136,13 @@ EnvironmentVariables {
     default: "auto-detect",
     example: "WAITLOCK_DIR=/var/run/locks waitlock myapp"
   },
-  
+
   WAITLOCK_TIMEOUT: {
     description: "Default timeout in seconds",
     default: "infinite",
     example: "WAITLOCK_TIMEOUT=30 waitlock db_backup"
   },
-  
+
   WAITLOCK_DEBUG: {
     description: "Enable debug output to stderr",
     values: "1, true, yes (case insensitive)",
@@ -165,18 +165,18 @@ ExitCodes {
     6: "Lock directory not accessible or cannot be created",
     75: "Temporary failure (EX_TEMPFAIL) - retry might succeed"
   },
-  
+
   CheckMode {
     0: "Lock is available (could be acquired)",
     1: "Lock is currently held",
     2: "Error checking lock status"
   },
-  
+
   ListMode {
     0: "Command executed successfully (locks may or may not exist)",
     1: "Error during execution"
   },
-  
+
   ExecMode {
     "Exits with status of executed command, or 126/127 for exec failures"
   }
@@ -187,12 +187,12 @@ ExitCodes {
 
 ```blueprint
 Architecture WaitLock {
-  
+
   CoreComponents {
-    
+
     LockManager {
       description: "Central lock acquisition and management logic",
-      
+
       properties: {
         descriptor: "char[256]",
         lock_directory: "char[PATH_MAX]",
@@ -201,7 +201,7 @@ Architecture WaitLock {
         check_only: "bool",
         exec_command: "char*"
       },
-      
+
       methods: [
         initialize(options) -> "error_code",
         acquire_lock() -> "bool",
@@ -210,15 +210,15 @@ Architecture WaitLock {
         cleanup_stale_locks() -> "int count_cleaned"
       ]
     },
-    
+
     LockFile {
       description: "Individual lock file representation",
-      
+
       format: {
         filename: "<descriptor>.<hostname>.<pid>.lock",
         example: "database_backup.server01.12345.lock"
       },
-      
+
       content_structure: {
         version: "int",
         pid: "pid_t",
@@ -232,10 +232,10 @@ Architecture WaitLock {
         max_holders: "int"
       }
     },
-    
+
     LockDirectory {
       description: "Lock directory management and discovery",
-      
+
       search_order: [
         "/var/run/waitlock",
         "/run/waitlock",
@@ -244,17 +244,17 @@ Architecture WaitLock {
         "${HOME}/.waitlock",
         "./waitlock"
       ],
-      
+
       methods: [
         find_or_create_directory() -> "const char*",
         verify_permissions() -> "bool",
         list_lock_files(descriptor_filter) -> "file_list"
       ]
     },
-    
+
     ProcessManager {
       description: "Process detection and command line extraction",
-      
+
       methods: [
         process_exists(pid) -> "bool",
         get_process_cmdline(pid) -> "char*",
@@ -262,15 +262,15 @@ Architecture WaitLock {
         send_signal_to_process(pid, signal) -> "error_code"
       ]
     },
-    
+
     LockLister {
       description: "Lock listing and reporting functionality",
-      
+
       output_formats: {
         human: {
           header: "DESCRIPTOR          PID    USER     ACQUIRED             COMMAND",
           row:    "%-18s %-6d %-8s %-19s %s",
-          
+
           example: [
             "DESCRIPTOR          PID    USER     ACQUIRED             COMMAND",
             "database_backup     12345  root     2024-01-15 10:23:45  /usr/local/bin/backup.sh --daily",
@@ -278,75 +278,75 @@ Architecture WaitLock {
             "  [STALE]          (1234)  root     2024-01-15 09:15:00  Process no longer exists"
           ]
         },
-        
+
         csv: {
           header: "descriptor,pid,user,acquired,status,command",
           row: "%s,%d,%s,%ld,%s,%s",
           example: "database_backup,12345,root,1705332225,active,/usr/local/bin/backup.sh --daily"
         },
-        
+
         null: {
           /* Null-separated output for safe parsing */
           format: "descriptor\0pid\0user\0acquired\0status\0command\0",
           notes: "All fields null-terminated, records double-null-terminated"
         }
       },
-      
+
       methods: [
         list_all_locks(format, show_stale, stale_only) -> "void",
         format_lock_entry(lock_info, format) -> "void",
         check_stale_status(lock_info) -> "enum {ACTIVE, STALE, UNKNOWN}"
       ]
     },
-    
+
     CheckMode {
       description: "Test lock availability without acquiring",
-      
+
       methods: [
         check_lock_available(descriptor) -> "bool",
         count_active_locks(descriptor) -> "int",
         get_lock_holders(descriptor) -> "pid_list"
       ]
     },
-    
+
     ExecMode {
       description: "Execute command while holding lock",
-      
+
       behavior: [
         "Acquire lock before fork/exec",
         "Pass signals to child process",
         "Release lock after child exits",
         "Exit with child's exit status"
       ],
-      
+
       signal_handling: "Forward all catchable signals to child"
     },
-    
+
     StdinReader {
       description: "Read descriptor from stdin if not provided",
-      
+
       methods: [
         read_descriptor_stdin() -> "char*",
         validate_descriptor(input) -> "bool"
       ]
     },
-    
+
     SyslogIntegration {
       description: "Optional syslog logging for audit trails",
-      
+
       log_events: [
         "Lock acquired: waitlock[PID]: acquired lock 'descriptor' for 'command'",
         "Lock released: waitlock[PID]: released lock 'descriptor' after N seconds",
         "Lock timeout: waitlock[PID]: timeout waiting for lock 'descriptor'",
         "Lock conflict: waitlock[PID]: lock 'descriptor' held by PID owner"
       ],
-      
+
       implementation: {
         facility_map: {
           "daemon": "LOG_DAEMON",
           "local0-7": "LOG_LOCAL0 through LOG_LOCAL7"
         },
-        
+
         priority: "LOG_INFO for normal operations, LOG_WARNING for conflicts"
       }
     }
@@ -358,18 +358,18 @@ Architecture WaitLock {
 
 ```blueprint
 PortableImplementation {
-  
+
   CStandard {
     version: "C89/C90 (ANSI C)",
     posix: "POSIX.1-2001",
-    
+
     compiler_flags: {
       strict: "-ansi -pedantic -Wall -Wextra",
       optimization: "-O2",
       debug: "-g -DDEBUG"
     }
   },
-  
+
   FeatureDetection {
     configure_checks: [
       "AC_CHECK_FUNCS([flock fcntl lockf])",
@@ -380,9 +380,9 @@ PortableImplementation {
       "AC_CHECK_DECLS([_SC_NPROCESSORS_ONLN])"
     ]
   },
-  
+
   PortablePatterns {
-    
+
     FileLocking {
       /* Portable locking with fallbacks */
       int portable_lock(int fd, int operation) {
@@ -404,72 +404,72 @@ PortableImplementation {
         #endif
       }
     },
-    
+
     ProcessCmdline {
       /* Portable command line extraction */
       char* get_process_cmdline(pid_t pid) {
         static char cmdline[4096];
-        
+
         #ifdef __linux__
           char proc_path[64];
           int fd;
           ssize_t len;
-          
+
           snprintf(proc_path, sizeof(proc_path), "/proc/%d/cmdline", (int)pid);
           fd = open(proc_path, O_RDONLY);
           if (fd < 0) return NULL;
-          
+
           len = read(fd, cmdline, sizeof(cmdline) - 1);
           close(fd);
-          
+
           if (len <= 0) return NULL;
           cmdline[len] = '\0';
-          
+
           /* Replace nulls with spaces */
           for (int i = 0; i < len - 1; i++) {
             if (cmdline[i] == '\0') cmdline[i] = ' ';
           }
-          
+
         #elif defined(__FreeBSD__) || defined(__APPLE__)
           /* Use sysctl on BSD systems */
           int mib[4];
           size_t len = sizeof(cmdline);
-          
+
           mib[0] = CTL_KERN;
           mib[1] = KERN_PROC;
           mib[2] = KERN_PROC_ARGS;
           mib[3] = pid;
-          
+
           if (sysctl(mib, 4, cmdline, &len, NULL, 0) < 0) {
             return NULL;
           }
-          
+
         #else
           /* Fallback: try ps command */
           FILE *fp;
           char ps_cmd[128];
-          
+
           snprintf(ps_cmd, sizeof(ps_cmd), "ps -p %d -o args= 2>/dev/null", (int)pid);
           fp = popen(ps_cmd, "r");
           if (fp == NULL) return NULL;
-          
+
           if (fgets(cmdline, sizeof(cmdline), fp) == NULL) {
             pclose(fp);
             return NULL;
           }
           pclose(fp);
-          
+
           /* Remove trailing newline */
           len = strlen(cmdline);
           if (len > 0 && cmdline[len-1] == '\n') {
             cmdline[len-1] = '\0';
           }
         #endif
-        
+
         return cmdline;
       }
     },
-    
+
     CPUCount {
       /* Portable CPU detection */
       int get_cpu_count(void) {
@@ -477,7 +477,7 @@ PortableImplementation {
           long count = sysconf(_SC_NPROCESSORS_ONLN);
           if (count > 0) return (int)count;
         #endif
-        
+
         #ifdef HW_NCPU
           int mib[2] = { CTL_HW, HW_NCPU };
           int count;
@@ -486,7 +486,7 @@ PortableImplementation {
             return count;
           }
         #endif
-        
+
         #ifdef __linux__
           /* Parse /proc/cpuinfo as fallback */
           FILE *fp = fopen("/proc/cpuinfo", "r");
@@ -502,7 +502,7 @@ PortableImplementation {
             if (count > 0) return count;
           }
         #endif
-        
+
         return 1; /* Safe default */
       }
     }
@@ -515,7 +515,7 @@ PortableImplementation {
 ```blueprint
 LockFileFormat {
   version: 1,
-  
+
   BinaryFormat {
     /* Fixed-size binary format for atomic writes */
     struct lock_info {
@@ -533,13 +533,13 @@ LockFileFormat {
       uint32_t checksum;    /* Simple checksum */
     };
   },
-  
+
   TextFallback {
     /* Human-readable format if binary fails */
     format: [
       "VERSION=1",
       "PID=%d",
-      "PPID=%d", 
+      "PPID=%d",
       "UID=%d",
       "ACQUIRED=%ld",
       "TYPE=%s",
@@ -556,7 +556,7 @@ LockFileFormat {
 
 ```blueprint
 ErrorHandling {
-  
+
   ErrorCodes {
     /* Exit codes follow UNIX conventions */
     SUCCESS: 0,              /* Operation completed successfully */
@@ -570,12 +570,12 @@ ErrorHandling {
     E_EXEC: 126,            /* Command found but not executable */
     E_NOTFOUND: 127         /* Command not found (--exec mode) */
   },
-  
+
   ErrorReporting {
     /* All errors to stderr, respect --quiet flag */
     void report_error(int code, const char *context) {
       if (g_quiet && code != E_USAGE) return;
-      
+
       const char *msg;
       switch(code) {
         case E_BUSY:     msg = "Lock is held by another process"; break;
@@ -587,7 +587,7 @@ ErrorHandling {
         case E_TEMPFAIL: msg = "Temporary failure"; break;
         default:         msg = "Unknown error"; break;
       }
-      
+
       if (context && g_verbose) {
         fprintf(stderr, "waitlock: %s: %s\n", context, msg);
       } else {
@@ -595,17 +595,17 @@ ErrorHandling {
       }
     }
   },
-  
+
   DebugOutput {
     /* When WAITLOCK_DEBUG=1 or --verbose */
     categories: [
       "Lock directory selection",
-      "Lock file operations", 
+      "Lock file operations",
       "Process detection",
       "Signal handling",
       "Stale lock cleanup"
     ],
-    
+
     format: "waitlock[%d]: DEBUG: %s\n"
   }
 }
@@ -615,7 +615,7 @@ ErrorHandling {
 
 ```blueprint
 SignalHandling {
-  
+
   SignalsToHandle [
     SIGTERM,  /* Termination request */
     SIGINT,   /* Interrupt (Ctrl+C) */
@@ -623,7 +623,7 @@ SignalHandling {
     SIGQUIT,  /* Quit */
     SIGPIPE   /* Broken pipe (ignore) */
   ],
-  
+
   Implementation {
     /* Global for signal handler access */
     static struct lock_state {
@@ -631,33 +631,33 @@ SignalHandling {
       char lock_path[PATH_MAX];
       volatile sig_atomic_t should_exit;
     } g_state = { -1, "", 0 };
-    
+
     void signal_handler(int sig) {
       g_state.should_exit = 1;
-      
+
       /* Attempt cleanup in handler (not ideal but necessary) */
       if (g_state.lock_fd >= 0) {
         close(g_state.lock_fd);
         unlink(g_state.lock_path);
       }
-      
+
       /* Re-raise signal for proper exit code */
       signal(sig, SIG_DFL);
       raise(sig);
     }
-    
+
     void install_signal_handlers(void) {
       struct sigaction sa;
       memset(&sa, 0, sizeof(sa));
       sa.sa_handler = signal_handler;
       sigemptyset(&sa.sa_mask);
       sa.sa_flags = 0;
-      
+
       sigaction(SIGTERM, &sa, NULL);
       sigaction(SIGINT, &sa, NULL);
       sigaction(SIGHUP, &sa, NULL);
       sigaction(SIGQUIT, &sa, NULL);
-      
+
       /* Ignore SIGPIPE */
       signal(SIGPIPE, SIG_IGN);
     }
@@ -669,10 +669,10 @@ SignalHandling {
 
 ```blueprint
 UsageExamples {
-  
+
   BasicMutex {
     description: "Simple mutual exclusion",
-    
+
     script: [
       "#!/bin/sh",
       "# Wait for exclusive access to database",
@@ -684,10 +684,10 @@ UsageExamples {
       "# Lock automatically released on exit"
     ]
   },
-  
+
   CheckAndWait {
     description: "Check before waiting pattern",
-    
+
     script: [
       "#!/bin/sh",
       "# Check if available first",
@@ -699,10 +699,10 @@ UsageExamples {
       "waitlock database_backup"
     ]
   },
-  
+
   ExecPattern {
     description: "Execute command with lock",
-    
+
     script: [
       "# More UNIX-like: lock wraps command execution",
       "waitlock database_backup --exec '/usr/local/bin/backup.sh --daily'",
@@ -710,10 +710,10 @@ UsageExamples {
       "# Signals are properly forwarded to the child process"
     ]
   },
-  
+
   PipelineUsage {
     description: "Using stdin for descriptor",
-    
+
     script: [
       "# Generate dynamic lock names",
       "echo \"backup_$(date +%Y%m%d)\" | waitlock",
@@ -724,10 +724,10 @@ UsageExamples {
       "done"
     ]
   },
-  
+
   ParallelExecution {
     description: "Controlled parallelism with xargs",
-    
+
     script: [
       "# Process files with max 4 parallel jobs",
       "find . -name '*.dat' | \\",
@@ -735,10 +735,10 @@ UsageExamples {
       "  'waitlock -m 4 batch_processor --exec \"process_file {}\"'"
     ]
   },
-  
+
   MachineReadableOutput {
     description: "Parse lock information",
-    
+
     script: [
       "# Count active locks",
       "waitlock --list --format=csv | tail -n +2 | wc -l",
@@ -752,10 +752,10 @@ UsageExamples {
       "  xargs -0 -n6 printf 'Lock: %s PID: %s\\n'"
     ]
   },
-  
+
   Monitoring {
     description: "Lock monitoring patterns",
-    
+
     script: [
       "# Watch locks in real-time",
       "watch -n 1 'waitlock --list'",
@@ -770,10 +770,10 @@ UsageExamples {
       "WAITLOCK_DEBUG=1 waitlock --syslog db_task"
     ]
   },
-  
+
   ErrorHandling {
     description: "Robust error handling",
-    
+
     script: [
       "#!/bin/sh",
       "# Handle different exit codes",
@@ -786,10 +786,10 @@ UsageExamples {
       "esac"
     ]
   },
-  
+
   CleanupPatterns {
     description: "Stale lock cleanup",
-    
+
     script: [
       "# List only stale locks",
       "waitlock --list --stale-only",
@@ -806,10 +806,10 @@ UsageExamples {
 
 ```blueprint
 ComposabilityPatterns {
-  
+
   ConditionalExecution {
     description: "Combine with shell logic",
-    
+
     examples: [
       "# Only run if no other instance is running",
       "waitlock --check myapp && waitlock myapp --exec ./myapp",
@@ -818,20 +818,20 @@ ComposabilityPatterns {
       "waitlock --timeout 5 render || waitlock fallback_render"
     ]
   },
-  
+
   ResourcePools {
     description: "Manage resource pools",
-    
+
     example: [
       "# GPU allocation (4 GPUs available)",
       "gpu_id=$(waitlock -m 4 gpu_pool --exec 'echo $WAITLOCK_SLOT')",
       "export CUDA_VISIBLE_DEVICES=$gpu_id"
     ]
   },
-  
+
   DistributedCoordination {
     description: "Coordinate across machines",
-    
+
     example: [
       "# NFS-based distributed locking",
       "WAITLOCK_DIR=/mnt/shared/locks waitlock cluster_task",
@@ -847,10 +847,10 @@ ComposabilityPatterns {
 
 ```blueprint
 BuildSystem {
-  
+
   ConfigureScript {
     description: "Autoconf-based configuration",
-    
+
     configure_ac: [
       "AC_INIT([waitlock], [1.0.0])",
       "AC_CONFIG_HEADERS([config.h])",
@@ -859,7 +859,7 @@ BuildSystem {
       "AC_PROG_CC",
       "AC_PROG_CC_C89",
       "",
-      "# Header checks", 
+      "# Header checks",
       "AC_CHECK_HEADERS([sys/file.h sys/param.h])",
       "",
       "# Function checks",
@@ -874,10 +874,10 @@ BuildSystem {
       "AC_OUTPUT"
     ]
   },
-  
+
   Makefile {
     description: "Portable Makefile.in template",
-    
+
     content: [
       "CC = @CC@",
       "CFLAGS = @CFLAGS@ -I.",
@@ -913,16 +913,16 @@ BuildSystem {
 
 ```blueprint
 TestingStrategy {
-  
+
   UnitTests {
     description: "Portable test suite",
-    
+
     test_categories: [
       {
         name: "Lock acquisition",
         tests: [
           "Single process mutex",
-          "Multiple process mutex conflict", 
+          "Multiple process mutex conflict",
           "Semaphore counting",
           "CPU-based limits"
         ]
@@ -947,10 +947,10 @@ TestingStrategy {
       }
     ]
   },
-  
+
   IntegrationTests {
     description: "Real-world scenarios",
-    
+
     scenarios: [
       "Database backup coordination",
       "Build system parallelization",
@@ -958,10 +958,10 @@ TestingStrategy {
       "Distributed locking over NFS"
     ]
   },
-  
+
   PlatformTesting {
     description: "Platforms to verify",
-    
+
     required: [
       "Linux (glibc)",
       "Linux (musl)",
@@ -969,7 +969,7 @@ TestingStrategy {
       "OpenBSD",
       "macOS"
     ],
-    
+
     optional: [
       "NetBSD",
       "Solaris/illumos",
@@ -986,31 +986,31 @@ TestingStrategy {
 
 ```blueprint
 Performance {
-  
+
   Optimizations {
     lock_directory_caching: "Cache discovered lock directory path",
-    
+
     exponential_backoff: {
       initial_ms: 10,
       max_ms: 1000,
       multiplier: 2.0,
       jitter: "Add 0-10% random jitter to prevent thundering herd"
     },
-    
+
     batch_stale_cleanup: "Clean all stale locks in one directory scan",
-    
+
     minimal_syscalls: "Reduce system calls in hot paths",
-    
+
     lock_coalescing: "Check all locks for a descriptor in one pass"
   },
-  
+
   Scalability {
     expected_limits: {
       concurrent_waiters: "10,000+ processes",
       lock_descriptors: "Limited by filesystem inodes",
       performance: "O(n) where n = active locks for descriptor"
     },
-    
+
     recommendations: [
       "Use hierarchical descriptors for namespace separation",
       "Consider dedicated lock directory on tmpfs for performance",
@@ -1024,18 +1024,18 @@ Performance {
 
 ```blueprint
 Security {
-  
+
   FilePermissions {
     lock_directory: "0755 or 01777 (sticky bit)",
     lock_files: "0644 (readable by all, writable by owner)",
-    
+
     validation: [
       "Check directory ownership",
       "Verify no symlink attacks",
       "Validate lock file ownership before removal"
     ]
   },
-  
+
   InputValidation {
     descriptor: {
       allowed: "Alphanumeric, underscore, dash, dot",
@@ -1043,21 +1043,21 @@ Security {
       max_length: 255,
       examples: ["my_app", "backup.daily", "node-1", "v2.0"]
     },
-    
+
     paths: {
       validation: "Canonicalize and verify no directory traversal",
       checks: ["No ..", "No symlinks in lock directory", "Absolute path resolution"]
     },
-    
+
     stdin_input: {
       handling: "Read first line only, strip whitespace",
       max_read: 256
     }
   },
-  
+
   PrivilegeSeparation {
     description: "Drop privileges when possible",
-    
+
     operations_requiring_root: [
       "Force killing other users' processes",
       "Removing other users' lock files",
@@ -1071,7 +1071,7 @@ Security {
 
 ```blueprint
 FutureConsiderations {
-  
+
   PotentialEnhancements [
     {
       feature: "Lock slots",
@@ -1079,7 +1079,7 @@ FutureConsiderations {
       rationale: "Useful for resource pool management (e.g., GPU selection)"
     },
     {
-      feature: "Read/write locks", 
+      feature: "Read/write locks",
       description: "Multiple readers, single writer pattern",
       implementation: "--read and --write flags"
     },
@@ -1089,7 +1089,7 @@ FutureConsiderations {
       implementation: "--expect-duration for monitoring"
     }
   ],
-  
+
   ExplicitNonGoals [
     "Network/distributed locking (use dedicated tools)",
     "Persistent lock state across reboots",
@@ -1104,7 +1104,7 @@ FutureConsiderations {
 
 ```blueprint
 ImplementationPhases {
-  
+
   Phase1_Core {
     duration: "1 day",
     deliverables: [
@@ -1114,7 +1114,7 @@ ImplementationPhases {
       "Signal handling"
     ]
   },
-  
+
   Phase2_Features {
     duration: "1 day",
     deliverables: [
@@ -1124,7 +1124,7 @@ ImplementationPhases {
       "Stdin descriptor reading"
     ]
   },
-  
+
   Phase3_OutputExec {
     duration: "1 day",
     deliverables: [
@@ -1134,7 +1134,7 @@ ImplementationPhases {
       "Syslog integration"
     ]
   },
-  
+
   Phase4_Portability {
     duration: "2 days",
     deliverables: [
@@ -1144,7 +1144,7 @@ ImplementationPhases {
       "Comprehensive testing"
     ]
   },
-  
+
   Phase5_Documentation {
     duration: "1 day",
     deliverables: [
@@ -1161,7 +1161,7 @@ ImplementationPhases {
 
 ```blueprint
 UNIXPhilosophy {
-  
+
   Principles {
     DoOneThingWell: {
       description: "Focus on lock acquisition and release",
@@ -1171,7 +1171,7 @@ UNIXPhilosophy {
         "Let other tools handle process management"
       ]
     },
-    
+
     TextInterface: {
       description: "Text-based input/output",
       implementation: [
@@ -1180,7 +1180,7 @@ UNIXPhilosophy {
         "Parse-friendly error messages on stderr"
       ]
     },
-    
+
     Composability: {
       description: "Work well with other programs",
       implementation: [
@@ -1190,7 +1190,7 @@ UNIXPhilosophy {
         "Stdin support for dynamic descriptors"
       ]
     },
-    
+
     Silence: {
       description: "No unnecessary output",
       implementation: [
@@ -1199,7 +1199,7 @@ UNIXPhilosophy {
         "Verbose mode available when needed"
       ]
     },
-    
+
     Portability: {
       description: "Run everywhere",
       implementation: [
@@ -1209,22 +1209,22 @@ UNIXPhilosophy {
       ]
     }
   },
-  
+
   DesignChoices {
     NoComplexManagement: {
       rationale: "Let users compose their own management tools",
       examples: [
         "No built-in --kill functionality",
-        "No --force-unlock option", 
+        "No --force-unlock option",
         "Users can: kill $(waitlock --list --format=csv | grep mylock | cut -d, -f2)"
       ]
     },
-    
+
     EnvironmentVariables: {
       rationale: "Allow configuration without modifying scripts",
       usage: "WAITLOCK_TIMEOUT=30 ./batch_job.sh"
     },
-    
+
     StandardExitCodes: {
       rationale: "Predictable behavior in scripts",
       usage: "waitlock mylock || handle_lock_failure"
@@ -1237,18 +1237,18 @@ UNIXPhilosophy {
 
 ```blueprint
 ToolSeparation {
-  
+
   CoreTool {
     name: "waitlock",
     purpose: "Acquire, hold, and release locks",
-    
+
     included_features: [
       "Lock acquisition (mutex/semaphore)",
       "Lock checking (--check)",
       "Lock listing (--list)",
       "Command execution (--exec)"
     ],
-    
+
     explicitly_excluded: [
       "Force killing processes",
       "Force removing lock files",
@@ -1256,10 +1256,10 @@ ToolSeparation {
       "Lock migration or upgrade"
     ]
   },
-  
+
   ComplementaryTools {
     description: "Users can build these as needed",
-    
+
     examples: [
       {
         name: "waitlock-cleanup",
@@ -1273,7 +1273,7 @@ ToolSeparation {
           "  done"
         ]
       },
-      
+
       {
         name: "waitlock-monitor",
         purpose: "Monitor lock health",
@@ -1284,9 +1284,9 @@ ToolSeparation {
           "  awk -F, 'systime()-$4 > 300 {print $1 \" held too long\"}'"
         ]
       },
-      
+
       {
-        name: "waitlock-kill", 
+        name: "waitlock-kill",
         purpose: "Kill lock holders",
         implementation: [
           "#!/bin/sh",
@@ -1305,7 +1305,7 @@ ToolSeparation {
 
 ```blueprint
 ManPage {
-  
+
   Synopsis {
     "waitlock [options] <descriptor>",
     "waitlock --list [--format=<fmt>] [--all|--stale-only]",
@@ -1313,17 +1313,17 @@ ManPage {
     "waitlock --exec <command> <descriptor>",
     "echo <descriptor> | waitlock [options]"
   },
-  
+
   Description {
     brief: "waitlock - process synchronization tool for shell scripts",
-    
+
     details: [
       "waitlock provides mutex and semaphore functionality for coordinating",
       "access to resources between multiple processes. Locks are automatically",
       "released when the process exits, ensuring no stale locks remain."
     ]
   },
-  
+
   Examples {
     "Simple mutex:",
     "  waitlock db_backup && perform_backup",
@@ -1340,7 +1340,7 @@ ManPage {
     "List active locks:",
     "  waitlock --list --format=csv | grep -c active"
   },
-  
+
   SeeAlso: [
     "flock(1) - file-based locking",
     "lockfile(1) - simple file locking",

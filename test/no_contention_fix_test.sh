@@ -37,17 +37,17 @@ run_test() {
     local test_cmd="$2"
     local expected_exit_code="$3"
     local max_time="$4"
-    
+
     TESTS_RUN=$((TESTS_RUN + 1))
-    
+
     echo -e "\n${YELLOW}[TEST $TESTS_RUN] $test_name${NC}"
     echo "Command: $test_cmd"
     echo "Expected exit code: $expected_exit_code"
     echo "Max time: ${max_time}s"
-    
+
     # Run the command with timeout
     start_time=$(date +%s.%N)
-    
+
     if timeout "$max_time" bash -c "$test_cmd" >/dev/null 2>&1; then
         actual_exit_code=0
     else
@@ -59,13 +59,13 @@ run_test() {
             return 1
         fi
     fi
-    
+
     end_time=$(date +%s.%N)
     duration=$(echo "$end_time - $start_time" | bc -l)
-    
+
     echo "Actual exit code: $actual_exit_code"
     echo "Duration: ${duration}s"
-    
+
     if [ "$actual_exit_code" -eq "$expected_exit_code" ]; then
         echo -e "${GREEN}PASS${NC}"
         TESTS_PASSED=$((TESTS_PASSED + 1))
@@ -83,8 +83,8 @@ test_basic_no_contention() {
     # Start in background and check if it starts quickly
     $WAITLOCK --lock-dir "$TEST_DIR" --timeout 0.1 test_basic &
     local bg_pid=$!
-    sleep 0.2  # Give it time to acquire the lock
-    
+    sleep 0.2 # Give it time to acquire the lock
+
     # Check if the process is still running (it should be, holding the lock)
     if kill -0 $bg_pid 2>/dev/null; then
         echo -e "${GREEN}PASS: Lock acquired and process is running${NC}"
@@ -118,12 +118,12 @@ test_timeout_with_contention() {
     # Start a background process that holds the lock
     $WAITLOCK --lock-dir "$TEST_DIR" --timeout 10 test_contention &
     local bg_pid=$!
-    sleep 0.2  # Give it time to acquire the lock
-    
+    sleep 0.2 # Give it time to acquire the lock
+
     # Now try to acquire the same lock with a short timeout
     local cmd="$WAITLOCK --lock-dir '$TEST_DIR' --timeout 0.1 test_contention"
-    run_test "$test_name" "$cmd" 2 0.5  # Should timeout (exit code 2)
-    
+    run_test "$test_name" "$cmd" 2 0.5 # Should timeout (exit code 2)
+
     # Clean up background process
     kill $bg_pid 2>/dev/null || true
     wait $bg_pid 2>/dev/null || true
@@ -167,11 +167,11 @@ test_exec_command() {
 # Test 10: Complex scenario with cleanup
 test_complex_scenario() {
     local test_name="Complex scenario with stale lock cleanup"
-    
+
     # Create a fake stale lock file
     mkdir -p "$TEST_DIR"
-    echo "fake lock file" > "$TEST_DIR/test_complex.slot0.fakehost.99999.lock"
-    
+    echo "fake lock file" >"$TEST_DIR/test_complex.slot0.fakehost.99999.lock"
+
     # This should clean up the stale lock and acquire successfully
     local cmd="$WAITLOCK --lock-dir '$TEST_DIR' --timeout 0.1 test_complex"
     run_test "$test_name" "$cmd" 0 0.5
@@ -186,24 +186,24 @@ main() {
     echo "This test suite verifies that the fix for the no-contention"
     echo "hanging issue continues to work correctly."
     echo ""
-    
+
     # Check if waitlock binary exists
     if [ ! -f "$WAITLOCK" ]; then
         echo -e "${RED}ERROR: waitlock binary not found at $WAITLOCK${NC}"
         echo "Please run 'make' first to build the project."
         exit 1
     fi
-    
+
     # Check if bc is available for time calculations
     if ! command -v bc >/dev/null 2>&1; then
         echo -e "${YELLOW}WARNING: bc not available, time calculations may be imprecise${NC}"
     fi
-    
+
     setup_test_env
-    
+
     # Run all tests
     echo -e "\n${YELLOW}Starting test execution...${NC}"
-    
+
     test_basic_no_contention
     test_multiple_no_contention
     test_semaphore_available_slots
@@ -214,9 +214,9 @@ main() {
     test_list_command_speed
     test_exec_command
     test_complex_scenario
-    
+
     cleanup_test_env
-    
+
     # Print summary
     echo ""
     echo "=========================================="
@@ -225,7 +225,7 @@ main() {
     echo "Tests run: $TESTS_RUN"
     echo -e "Tests passed: ${GREEN}$TESTS_PASSED${NC}"
     echo -e "Tests failed: ${RED}$TESTS_FAILED${NC}"
-    
+
     if [ $TESTS_FAILED -eq 0 ]; then
         echo -e "\n${GREEN}ALL TESTS PASSED!${NC}"
         echo "The no-contention hanging fix is working correctly."

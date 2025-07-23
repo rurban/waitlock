@@ -26,19 +26,19 @@ acquire_and_hold() {
     local child_id=$1
     local hold_time=$2
     echo "[Child $child_id] Attempting to acquire lock..."
-    
+
     # Try to acquire the lock
     timeout 10 $WAITLOCK --lock-dir "$LOCK_DIR" -m 3 -t 2.0 "$DESCRIPTOR" &
     local waitlock_pid=$!
-    
+
     # Check if waitlock is still running (means it got the lock)
     sleep 0.5
     if kill -0 $waitlock_pid 2>/dev/null; then
         echo "[Child $child_id] SUCCESS: Acquired lock (PID $waitlock_pid)"
-        
+
         # Let it hold for specified time
         sleep $hold_time
-        
+
         # Kill waitlock to release the lock
         kill $waitlock_pid 2>/dev/null
         wait $waitlock_pid 2>/dev/null
@@ -60,9 +60,9 @@ results=()
 for i in {1..4}; do
     (
         if acquire_and_hold $i 4; then
-            exit 0  # Success
+            exit 0 # Success
         else
-            exit 1  # Failed
+            exit 1 # Failed
         fi
     ) &
     pids[$i]=$!
@@ -136,27 +136,27 @@ echo "[Test 2b] Testing exec with lock contention..."
 echo "[Holder] Acquiring lock for 4 seconds..."
 timeout 10 $WAITLOCK --lock-dir "$LOCK_DIR" -t 5.0 "$DESCRIPTOR2" &
 holder_pid=$!
-sleep 1  # Give holder time to acquire
+sleep 1 # Give holder time to acquire
 
 # Check if holder got the lock
 if kill -0 $holder_pid 2>/dev/null; then
     echo "[Holder] Successfully acquired lock"
-    
+
     # Now try exec with contention - should wait and succeed
     echo "[ExecChild] Trying exec with 6 second timeout (holder will release in ~3 sec)..."
     timeout 10 $WAITLOCK --lock-dir "$LOCK_DIR" -t 6.0 -e "echo 'Should succeed after wait'" "$DESCRIPTOR2" &
     exec_pid=$!
-    
+
     # Let holder run for 3 more seconds then kill it
     sleep 3
     kill $holder_pid 2>/dev/null
     wait $holder_pid 2>/dev/null
     echo "[Holder] Released lock"
-    
+
     # Wait for exec to complete
     wait $exec_pid
     exec_result=$?
-    
+
     if [ $exec_result -eq 0 ]; then
         echo "PASS: Exec with contention succeeded"
     else

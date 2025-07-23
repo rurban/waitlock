@@ -24,23 +24,23 @@ FAIL_COUNT=0
 # Cleanup function
 cleanup() {
     echo -e "\n${YELLOW}Cleaning up stress test...${NC}"
-    
+
     # Kill any remaining waitlock processes
     pkill -f "$WAITLOCK" 2>/dev/null || true
-    
+
     # Clean up test directory
     rm -rf "$TEST_DIR" 2>/dev/null || true
-    
+
     # Restore ulimits
     ulimit -n 1024 2>/dev/null || true
     ulimit -u 1024 2>/dev/null || true
-    
+
     # Summary
     echo -e "\n${YELLOW}=== STRESS TEST SUMMARY ===${NC}"
     echo -e "Total tests: $TEST_COUNT"
     echo -e "${GREEN}Passed: $PASS_COUNT${NC}"
     echo -e "${RED}Failed: $FAIL_COUNT${NC}"
-    
+
     if [ $FAIL_COUNT -eq 0 ]; then
         echo -e "\n${GREEN}All stress tests passed!${NC}"
         exit 0
@@ -99,7 +99,7 @@ ulimit -n 50 2>/dev/null || echo "  → Could not set ulimit, skipping FD test"
 
 if [ "$(ulimit -n)" -eq 50 ] 2>/dev/null; then
     echo "  → Testing with file descriptor limit of 50..."
-    
+
     # Try to create many locks
     pids=()
     for i in $(seq 1 40); do
@@ -107,7 +107,7 @@ if [ "$(ulimit -n)" -eq 50 ] 2>/dev/null; then
         pids+=($!)
         sleep 0.01
     done
-    
+
     # Check how many succeeded
     active_count=0
     for pid in "${pids[@]}"; do
@@ -115,14 +115,14 @@ if [ "$(ulimit -n)" -eq 50 ] 2>/dev/null; then
             active_count=$((active_count + 1))
         fi
     done
-    
+
     echo "  → $active_count/40 processes active with FD limit"
-    
+
     # Cleanup
     for pid in "${pids[@]}"; do
         kill $pid 2>/dev/null || true
     done
-    
+
     if [ $active_count -gt 0 ]; then
         test_pass
     else
@@ -143,7 +143,7 @@ ulimit -u 100 2>/dev/null || echo "  → Could not set ulimit, skipping process 
 
 if [ "$(ulimit -u)" -eq 100 ] 2>/dev/null; then
     echo "  → Testing with process limit of 100..."
-    
+
     # Try to create many processes
     pids=()
     for i in $(seq 1 80); do
@@ -151,7 +151,7 @@ if [ "$(ulimit -u)" -eq 100 ] 2>/dev/null; then
         pids+=($!)
         sleep 0.01
     done
-    
+
     # Check how many succeeded
     active_count=0
     for pid in "${pids[@]}"; do
@@ -159,14 +159,14 @@ if [ "$(ulimit -u)" -eq 100 ] 2>/dev/null; then
             active_count=$((active_count + 1))
         fi
     done
-    
+
     echo "  → $active_count/80 processes active with process limit"
-    
+
     # Cleanup
     for pid in "${pids[@]}"; do
         kill $pid 2>/dev/null || true
     done
-    
+
     if [ $active_count -gt 0 ]; then
         test_pass
     else
@@ -190,16 +190,16 @@ mkdir -p "$small_fs"
 if command -v truncate >/dev/null 2>&1; then
     fs_file="$TEST_DIR/small.img"
     truncate -s 1M "$fs_file"
-    
+
     # Try to create a loop device (requires root, so this might fail)
     if sudo losetup -f "$fs_file" 2>/dev/null; then
         loop_dev=$(sudo losetup -j "$fs_file" | cut -d: -f1)
         sudo mkfs.ext4 "$loop_dev" >/dev/null 2>&1
         sudo mount "$loop_dev" "$small_fs" 2>/dev/null
-        
+
         # Test with limited space
         echo "  → Testing with 1MB filesystem..."
-        
+
         # Try to create many locks
         pids=()
         for i in $(seq 1 100); do
@@ -207,7 +207,7 @@ if command -v truncate >/dev/null 2>&1; then
             pids+=($!)
             sleep 0.01
         done
-        
+
         # Check how many succeeded
         active_count=0
         for pid in "${pids[@]}"; do
@@ -215,17 +215,17 @@ if command -v truncate >/dev/null 2>&1; then
                 active_count=$((active_count + 1))
             fi
         done
-        
+
         echo "  → $active_count/100 processes active with space limit"
-        
+
         # Cleanup
         for pid in "${pids[@]}"; do
             kill $pid 2>/dev/null || true
         done
-        
+
         sudo umount "$small_fs" 2>/dev/null || true
         sudo losetup -d "$loop_dev" 2>/dev/null || true
-        
+
         if [ $active_count -gt 0 ]; then
             test_pass
         else
@@ -259,13 +259,13 @@ done
 # Check if process is still alive
 if kill -0 $target_pid 2>/dev/null; then
     echo "  → Process survived signal flood"
-    
+
     # Send termination signal
     kill -TERM $target_pid 2>/dev/null || true
-    
+
     # Wait for cleanup
     wait $target_pid 2>/dev/null || true
-    
+
     # Check if lock was cleaned up
     if ! $WAITLOCK --lock-dir "$LOCK_DIR" --check "signal_flood_test" >/dev/null 2>&1; then
         test_fail "Lock still held after signal flood"
@@ -292,10 +292,10 @@ if [ -n "$lock_file" ]; then
     # Kill the process holding the lock
     kill $lock_pid 2>/dev/null || true
     wait $lock_pid 2>/dev/null || true
-    
+
     # Corrupt the lock file
-    echo "CORRUPTED DATA" > "$lock_file"
-    
+    echo "CORRUPTED DATA" >"$lock_file"
+
     # Try to acquire the same lock
     if $WAITLOCK --lock-dir "$LOCK_DIR" --timeout 1 "corruption_test" >/dev/null 2>&1; then
         echo "  → Successfully handled corrupted lock file"
@@ -385,7 +385,7 @@ for pid in "${pids[@]}"; do
     kill $pid 2>/dev/null || true
 done
 
-if [ $active_count -gt 15 ]; then  # Allow 50% survival rate
+if [ $active_count -gt 15 ]; then # Allow 50% survival rate
     test_pass
 else
     test_fail "Too few processes survived memory pressure: $active_count/30"
@@ -427,7 +427,7 @@ lock_file=$(find "$LOCK_DIR" -name "perm_test.*.lock" | head -1)
 if [ -n "$lock_file" ]; then
     # Change permissions on lock file
     chmod 000 "$lock_file" 2>/dev/null || true
-    
+
     # Try to send done signal
     if $WAITLOCK --lock-dir "$LOCK_DIR" --done "perm_test" >/dev/null 2>&1; then
         echo "  → Successfully handled permission change"
@@ -436,7 +436,7 @@ if [ -n "$lock_file" ]; then
         echo "  → Could not handle permission change (expected)"
         test_pass
     fi
-    
+
     # Restore permissions and cleanup
     chmod 644 "$lock_file" 2>/dev/null || true
     kill $perm_pid 2>/dev/null || true
@@ -458,11 +458,11 @@ sleep 1
 # For this test, we just verify the process handles time normally
 if kill -0 $clock_pid 2>/dev/null; then
     echo "  → Process running normally with current time"
-    
+
     # Send signal to exit
     kill -TERM $clock_pid 2>/dev/null || true
     wait $clock_pid 2>/dev/null || true
-    
+
     test_pass
 else
     test_fail "Process died unexpectedly"

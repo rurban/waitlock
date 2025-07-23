@@ -3,7 +3,7 @@
  */
 
 #include "checksum.h"
-#include <stddef.h>  /* for offsetof */
+#include <stddef.h> /* for offsetof */
 
 /* CRC32 lookup table for fast checksum calculation */
 static const uint32_t crc32_table[256] = {
@@ -49,38 +49,38 @@ static const uint32_t crc32_table[256] = {
     0x40df0b66, 0x37d83bf0, 0xa9bcae53, 0xdebb9ec5, 0x47b2cf7f, 0x30b5ffe9,
     0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605, 0xcdd70693,
     0x54de5729, 0x23d967bf, 0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94,
-    0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
-};
+    0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d};
 
 /* CRC32 calculation using standard polynomial */
 uint32_t calculate_crc32(const void *data, size_t len) {
-    const uint8_t *bytes = (const uint8_t *)data;
-    uint32_t crc = 0xffffffff;
-    size_t i;
-    
-    for (i = 0; i < len; i++) {
-        crc = crc32_table[(crc ^ bytes[i]) & 0xff] ^ (crc >> 8);
-    }
-    
-    return crc ^ 0xffffffff;
+  const uint8_t *bytes = (const uint8_t *)data;
+  uint32_t crc = 0xffffffff;
+  size_t i;
+
+  for (i = 0; i < len; i++) {
+    crc = crc32_table[(crc ^ bytes[i]) & 0xff] ^ (crc >> 8);
+  }
+
+  return crc ^ 0xffffffff;
 }
 
 /* Calculate checksum for lock_info structure (excluding checksum field) */
 uint32_t calculate_lock_checksum(const struct lock_info *info) {
-    if (info == NULL) {
-        return 0;
-    }
-    /* Calculate checksum of everything except the checksum field itself */
-    /* The checksum field is at the end, so we calculate checksum of the struct minus the checksum field */
-    size_t data_size = offsetof(struct lock_info, checksum);
-    return calculate_crc32(info, data_size);
+  if (info == NULL) {
+    return 0;
+  }
+  /* Calculate checksum of everything except the checksum field itself */
+  /* The checksum field is at the end, so we calculate checksum of the struct
+   * minus the checksum field */
+  size_t data_size = offsetof(struct lock_info, checksum);
+  return calculate_crc32(info, data_size);
 }
 
 /* Validate lock file checksum */
 bool validate_lock_checksum(const struct lock_info *info) {
-    if (info == NULL) {
-        return FALSE;
-    }
-    uint32_t expected = calculate_lock_checksum(info);
-    return info->checksum == expected;
+  if (info == NULL) {
+    return FALSE;
+  }
+  uint32_t expected = calculate_lock_checksum(info);
+  return info->checksum == expected;
 }

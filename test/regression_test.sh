@@ -24,22 +24,22 @@ FAIL_COUNT=0
 # Cleanup function
 cleanup() {
     echo -e "\n${YELLOW}Cleaning up regression test...${NC}"
-    
+
     # Kill any remaining waitlock processes
     pkill -f "$WAITLOCK" 2>/dev/null || true
-    
+
     # Clean up test directory
     rm -rf "$TEST_DIR" 2>/dev/null || true
-    
+
     # Clean up environment
     unset WAITLOCK_DEBUG WAITLOCK_TIMEOUT WAITLOCK_DIR WAITLOCK_SLOT
-    
+
     # Summary
     echo -e "\n${YELLOW}=== REGRESSION TEST SUMMARY ===${NC}"
     echo -e "Total tests: $TEST_COUNT"
     echo -e "${GREEN}Passed: $PASS_COUNT${NC}"
     echo -e "${RED}Failed: $FAIL_COUNT${NC}"
-    
+
     if [ $FAIL_COUNT -eq 0 ]; then
         echo -e "\n${GREEN}All regression tests passed!${NC}"
         exit 0
@@ -104,10 +104,10 @@ sleep 1
 if ! $WAITLOCK --lock-dir "$LOCK_DIR" --check "sigkill_test" >/dev/null 2>&1; then
     # Kill with SIGKILL
     kill -9 $sigkill_pid 2>/dev/null || true
-    
+
     # Wait for cleanup
     sleep 2
-    
+
     # Try to acquire the same lock (should succeed if cleanup worked)
     if $WAITLOCK --lock-dir "$LOCK_DIR" --timeout 1 "sigkill_test" >/dev/null 2>&1; then
         echo "  → Lock properly cleaned up after SIGKILL"
@@ -177,7 +177,7 @@ if $WAITLOCK --lock-dir "$LOCK_DIR" --timeout 1 "env_test" >/dev/null 2>&1; then
 else
     end_time=$(date +%s)
     duration=$((end_time - start_time))
-    
+
     if [ $duration -le 3 ]; then
         echo "  → Command line timeout correctly overrode environment variable"
         test_pass
@@ -365,7 +365,7 @@ lock_file=$(find "$LOCK_DIR" -name "perm_test.*.lock" | head -1)
 if [ -n "$lock_file" ]; then
     # Check permissions
     perms=$(stat -c "%a" "$lock_file" 2>/dev/null || stat -f "%A" "$lock_file" 2>/dev/null)
-    
+
     if [ "$perms" = "644" ]; then
         echo "  → Lock file has correct permissions (644)"
         test_pass
@@ -397,7 +397,7 @@ duration=$(echo "$end_time - $start_time" | bc -l)
 expected_min=0.4
 expected_max=0.7
 
-if (( $(echo "$duration >= $expected_min && $duration <= $expected_max" | bc -l) )); then
+if (($(echo "$duration >= $expected_min && $duration <= $expected_max" | bc -l))); then
     echo "  → Timeout precision is acceptable: ${duration}s"
     test_pass
 else

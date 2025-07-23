@@ -35,32 +35,32 @@ echo -e "${BLUE}Test: Two scripts trying to run simultaneously${NC}"
 run_worker() {
     local worker_id="$1"
     local log_file="$TEST_DIR/worker_$worker_id.log"
-    
-    echo "[$worker_id] Starting worker" >> "$log_file"
-    
+
+    echo "[$worker_id] Starting worker" >>"$log_file"
+
     # Start waitlock in background
     $WAITLOCK --lock-dir "$LOCK_DIR" coordinationtest &
     LOCK_PID=$!
-    
-    echo "[$worker_id] Waitlock started (PID: $LOCK_PID)" >> "$log_file"
-    
+
+    echo "[$worker_id] Waitlock started (PID: $LOCK_PID)" >>"$log_file"
+
     # Give it time to try to acquire
     sleep 2
-    
+
     # Check if we got the lock
     if $WAITLOCK --lock-dir "$LOCK_DIR" --list | grep -q "coordinationtest.*$LOCK_PID"; then
-        echo "[$worker_id] SUCCESS: Got the lock!" >> "$log_file"
-        echo "[$worker_id] Doing critical work..." >> "$log_file"
-        
+        echo "[$worker_id] SUCCESS: Got the lock!" >>"$log_file"
+        echo "[$worker_id] Doing critical work..." >>"$log_file"
+
         # Simulate work
         sleep 3
-        
-        echo "[$worker_id] Work complete, releasing lock" >> "$log_file"
+
+        echo "[$worker_id] Work complete, releasing lock" >>"$log_file"
         kill $LOCK_PID
         wait $LOCK_PID 2>/dev/null || true
         return 0
     else
-        echo "[$worker_id] FAILED: Could not get lock" >> "$log_file"
+        echo "[$worker_id] FAILED: Could not get lock" >>"$log_file"
         kill $LOCK_PID 2>/dev/null || true
         return 1
     fi

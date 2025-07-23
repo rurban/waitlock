@@ -35,7 +35,7 @@ START_TIME=$(date +%s)
 if ! $WAITLOCK --lock-dir "$LOCK_DIR" env_timeout >/dev/null 2>&1; then
     END_TIME=$(date +%s)
     DURATION=$((END_TIME - START_TIME))
-    
+
     if [ $DURATION -ge 2 ] && [ $DURATION -le 4 ]; then
         test_pass "WAITLOCK_TIMEOUT environment variable works"
     else
@@ -132,10 +132,10 @@ test_start "WAITLOCK_EXCLUDE_CPUS environment variable"
 if [ $CPU_COUNT -gt 1 ]; then
     EXCLUDE_COUNT=1
     EXPECTED_COUNT=$((CPU_COUNT - EXCLUDE_COUNT))
-    
+
     export WAITLOCK_ONE_PER_CPU=1
     export WAITLOCK_EXCLUDE_CPUS=$EXCLUDE_COUNT
-    
+
     ENV_EXCLUDE_PIDS=()
     for i in $(seq 1 $EXPECTED_COUNT); do
         $WAITLOCK --lock-dir "$LOCK_DIR" env_exclude >/dev/null 2>&1 &
@@ -175,7 +175,7 @@ START_TIME=$(date +%s)
 if ! $WAITLOCK --lock-dir "$LOCK_DIR" --timeout 1 override_test >/dev/null 2>&1; then
     END_TIME=$(date +%s)
     DURATION=$((END_TIME - START_TIME))
-    
+
     if [ $DURATION -ge 1 ] && [ $DURATION -le 3 ]; then
         test_pass "Command line overrides environment timeout"
     else
@@ -244,7 +244,7 @@ unset WAITLOCK_LOCK_DIR
 
 # Test environment variable case sensitivity
 test_start "Environment variable case sensitivity"
-export waitlock_lock_dir="$LOCK_DIR"  # lowercase
+export waitlock_lock_dir="$LOCK_DIR" # lowercase
 if ! $WAITLOCK env_case_test >/dev/null 2>&1; then
     test_pass "Environment variables are case sensitive"
 else

@@ -113,8 +113,8 @@ START_TIME=$(date +%s.%N)
 if $WAITLOCK --lock-dir "$LOCK_DIR" --done done_timing >/dev/null 2>&1; then
     END_TIME=$(date +%s.%N)
     DURATION=$(echo "$END_TIME - $START_TIME" | bc -l)
-    
-    if (( $(echo "$DURATION < 1.0" | bc -l) )); then
+
+    if (($(echo "$DURATION < 1.0" | bc -l))); then
         test_pass "Done signal processed quickly"
     else
         test_fail "Done signal took too long: ${DURATION}s"

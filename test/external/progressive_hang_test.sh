@@ -24,7 +24,7 @@ else
 fi
 echo ""
 
-# Test 3: Check if issue is in signal handler installation  
+# Test 3: Check if issue is in signal handler installation
 echo "Test 3: Signal handlers + timeout"
 echo "Running: strace -e trace=rt_sigaction timeout 2 waitlock --timeout 0.1 no_desc"
 strace -e trace=rt_sigaction timeout 2 ../../build/bin/waitlock --timeout 0.1 no_desc 2>&1 | head -10

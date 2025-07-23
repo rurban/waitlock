@@ -1,15 +1,15 @@
 #ifndef PIPE_COORDINATOR_H
 #define PIPE_COORDINATOR_H
 
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 typedef struct {
-    int pipefd[2];
-    pid_t child_pid;
+  int pipefd[2];
+  pid_t child_pid;
 } PipeCoordinator;
 
 // Function to create and initialize a PipeCoordinator
@@ -41,7 +41,8 @@ void pipe_coordinator_close_read_end(PipeCoordinator *pc);
 void pipe_coordinator_close_write_end(PipeCoordinator *pc);
 
 // Function to write to the pipe
-ssize_t pipe_coordinator_write(PipeCoordinator *pc, const void *buf, size_t count);
+ssize_t pipe_coordinator_write(PipeCoordinator *pc, const void *buf,
+                               size_t count);
 
 // Function to read from the pipe
 ssize_t pipe_coordinator_read(PipeCoordinator *pc, void *buf, size_t count);

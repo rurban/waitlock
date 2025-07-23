@@ -203,7 +203,7 @@ else
     test_fail "List --all option failed"
 fi
 
-# Test 16: List with stale-only option  
+# Test 16: List with stale-only option
 test_start "List mode with --stale-only option"
 if $WAITLOCK --list --stale-only >/dev/null 2>&1; then
     test_pass "List --stale-only option works"
@@ -252,7 +252,7 @@ else
     test_fail "Quiet mode should suppress output"
 fi
 
-# Test 21: Verbose mode  
+# Test 21: Verbose mode
 test_start "Verbose mode (--verbose)"
 cleanup
 if timeout 3 $WAITLOCK --verbose ui_test_verbose &>/dev/null; then
@@ -358,7 +358,7 @@ done
 
 # Test 31: Long descriptor
 test_start "Long descriptor handling"
-LONG_DESC=$(printf 'a%.0s' {1..300})  # 300 character descriptor
+LONG_DESC=$(printf 'a%.0s' {1..300}) # 300 character descriptor
 if $WAITLOCK --timeout 0.1 "$LONG_DESC" 2>/dev/null; then
     test_fail "Should reject too-long descriptor"
 else

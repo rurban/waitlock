@@ -93,7 +93,7 @@ START_TIME=$(date +%s)
 if ! $WAITLOCK --lock-dir "$LOCK_DIR" --timeout 2 backup_process >/dev/null 2>&1; then
     END_TIME=$(date +%s)
     DURATION=$((END_TIME - START_TIME))
-    
+
     if [ $DURATION -ge 2 ] && [ $DURATION -le 4 ]; then
         test_pass "Backup timeout scenario works"
     else
@@ -295,7 +295,7 @@ test_start "Load balancing scenario"
 if [ $CPU_COUNT -gt 1 ]; then
     WORKERS=$((CPU_COUNT - 1))
     WORKER_PIDS=()
-    
+
     # Start workers with CPU exclusion
     for i in $(seq 1 $WORKERS); do
         $WAITLOCK --lock-dir "$LOCK_DIR" --onePerCPU --excludeCPUs 1 --exec sleep 2 worker >/dev/null 2>&1 &

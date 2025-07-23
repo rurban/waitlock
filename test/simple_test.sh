@@ -27,7 +27,7 @@ echo "Test 1: Basic --done functionality"
 
 # Start a waitlock process
 echo "Starting waitlock process..."
-$WAITLOCK --lock-dir "$LOCK_DIR" --verbose mylock > /tmp/waitlock.log 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" --verbose mylock >/tmp/waitlock.log 2>&1 &
 LOCK_PID=$!
 
 # Give it time to acquire the lock

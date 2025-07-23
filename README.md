@@ -506,7 +506,7 @@ WaitLock is tested on:
    ```bash
    # Check directory permissions
    ls -la /var/lock/waitlock
-   
+
    # Use user-specific directory
    export WAITLOCK_DIR="$HOME/.waitlock"
    ```
@@ -515,7 +515,7 @@ WaitLock is tested on:
    ```bash
    # List stale locks
    waitlock --list --stale-only
-   
+
    # Clean up automatically (locks are cleaned on next access)
    waitlock --check any_descriptor
    ```
@@ -524,7 +524,7 @@ WaitLock is tested on:
    ```bash
    # Monitor lock contention
    waitlock --verbose --timeout 1 busy_resource
-   
+
    # Use exponential backoff (built-in)
    waitlock --timeout 60 busy_resource
    ```

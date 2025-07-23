@@ -34,8 +34,8 @@ create_worker_script() {
     local script_path="$1"
     local worker_id="$2"
     local timeout="$3"
-    
-    cat > "$script_path" << EOF
+
+    cat >"$script_path" <<EOF
 #!/bin/bash
 echo "[$worker_id] Starting at \$(date '+%H:%M:%S')"
 
@@ -43,10 +43,10 @@ echo "[$worker_id] Starting at \$(date '+%H:%M:%S')"
 if $WAITLOCK --lock-dir "$LOCK_DIR" --timeout $timeout foregroundtest --exec bash -c "
     echo '[$worker_id] SUCCESS: Got the lock at \$(date +%H:%M:%S)'
     echo '[$worker_id] Doing critical work...'
-    
+
     # Simulate work
     sleep 2
-    
+
     echo '[$worker_id] Work complete at \$(date +%H:%M:%S)'
     echo '[$worker_id] Lock will be released automatically'
 "; then

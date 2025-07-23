@@ -4,7 +4,7 @@
 #include "../waitlock.h"
 
 /* Lock management functions */
-char* find_lock_directory(void);
+char *find_lock_directory(void);
 int acquire_lock(const char *descriptor, int max_holders, double timeout);
 void release_lock(void);
 int check_lock(const char *descriptor);

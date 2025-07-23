@@ -22,9 +22,9 @@ FAILED_TESTS=0
 run_test_file() {
     local test_file="$1"
     local test_name="$(basename "$test_file" .sh)"
-    
+
     echo -e "${BLUE}Running $test_name...${NC}"
-    
+
     if [ -x "$test_file" ]; then
         if "$test_file"; then
             echo -e "${GREEN}✓ $test_name passed${NC}"
@@ -37,7 +37,7 @@ run_test_file() {
         echo -e "${RED}✗ $test_name is not executable${NC}"
         FAILED_TESTS=$((FAILED_TESTS + 1))
     fi
-    
+
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
     echo ""
 }
@@ -56,7 +56,7 @@ main() {
     echo -e "${YELLOW}Waitlock External Test Suite${NC}"
     echo -e "${YELLOW}============================${NC}"
     echo ""
-    
+
     # Check if waitlock binary exists
     WAITLOCK_BINARY="../../build/bin/waitlock"
     if [ ! -x "$WAITLOCK_BINARY" ]; then
@@ -64,10 +64,10 @@ main() {
         echo "Please build waitlock first: make"
         exit 1
     fi
-    
+
     # Get the directory containing this script
     cd "$TEST_DIR"
-    
+
     # List of test files in order
     TEST_FILES=(
         "test_help_version.sh"
@@ -83,15 +83,15 @@ main() {
         "test_environment.sh"
         "test_scenarios.sh"
     )
-    
+
     # Make all test files executable
     for test_file in "${TEST_FILES[@]}"; do
         make_executable "$test_file"
     done
-    
+
     # Also make the framework executable
     make_executable "test_framework.sh"
-    
+
     # Run all tests
     for test_file in "${TEST_FILES[@]}"; do
         if [ -f "$test_file" ]; then
@@ -104,12 +104,12 @@ main() {
             TOTAL_TESTS=$((TOTAL_TESTS + 1))
         fi
     done
-    
+
     # Print summary
     echo -e "${YELLOW}Test Summary:${NC}"
     echo -e "Total tests: $TOTAL_TESTS"
     echo -e "${GREEN}Passed: $PASSED_TESTS${NC}"
-    
+
     if [ $FAILED_TESTS -gt 0 ]; then
         echo -e "${RED}Failed: $FAILED_TESTS${NC}"
         echo ""
@@ -124,40 +124,40 @@ main() {
 # Allow running specific test files
 if [ $# -gt 0 ]; then
     case "$1" in
-        help|--help|-h)
-            echo "Usage: $0 [test_name]"
-            echo ""
-            echo "Available tests:"
-            for test_file in test_*.sh; do
-                if [ -f "$test_file" ]; then
-                    echo "  $(basename "$test_file" .sh)"
-                fi
-            done
-            echo ""
-            echo "Run without arguments to run all tests"
-            exit 0
-            ;;
-        *)
-            # Try to run specific test
-            test_name="$1"
-            if [[ ! "$test_name" =~ \.sh$ ]]; then
-                test_name="${test_name}.sh"
+    help | --help | -h)
+        echo "Usage: $0 [test_name]"
+        echo ""
+        echo "Available tests:"
+        for test_file in test_*.sh; do
+            if [ -f "$test_file" ]; then
+                echo "  $(basename "$test_file" .sh)"
             fi
-            
-            if [ -f "$test_name" ]; then
-                make_executable "$test_name"
-                run_test_file "./$test_name"
-                
-                if [ $FAILED_TESTS -gt 0 ]; then
-                    exit 1
-                else
-                    exit 0
-                fi
-            else
-                echo -e "${RED}Error: Test file $test_name not found${NC}"
+        done
+        echo ""
+        echo "Run without arguments to run all tests"
+        exit 0
+        ;;
+    *)
+        # Try to run specific test
+        test_name="$1"
+        if [[ ! $test_name =~ \.sh$ ]]; then
+            test_name="${test_name}.sh"
+        fi
+
+        if [ -f "$test_name" ]; then
+            make_executable "$test_name"
+            run_test_file "./$test_name"
+
+            if [ $FAILED_TESTS -gt 0 ]; then
                 exit 1
+            else
+                exit 0
             fi
-            ;;
+        else
+            echo -e "${RED}Error: Test file $test_name not found${NC}"
+            exit 1
+        fi
+        ;;
     esac
 else
     main

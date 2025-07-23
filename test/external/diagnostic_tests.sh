@@ -58,7 +58,7 @@ fi
 
 kill $LOCK_PID3 2>/dev/null || true
 
-# Test 4: List functionality  
+# Test 4: List functionality
 test_start "List command functionality"
 $WAITLOCK --lock-dir "$LOCK_DIR" diag_test4 >/dev/null 2>&1 &
 LOCK_PID4=$!
@@ -91,7 +91,7 @@ fi
 
 kill $SEM_PID1 $SEM_PID2 2>/dev/null || true
 
-# Test 6: Done command  
+# Test 6: Done command
 test_start "Done command functionality"
 $WAITLOCK --lock-dir "$LOCK_DIR" diag_done_test >/dev/null 2>&1 &
 DONE_PID=$!

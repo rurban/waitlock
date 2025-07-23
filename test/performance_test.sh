@@ -24,19 +24,19 @@ FAIL_COUNT=0
 # Cleanup function
 cleanup() {
     echo -e "\n${YELLOW}Cleaning up performance test...${NC}"
-    
+
     # Kill any remaining waitlock processes
     pkill -f "$WAITLOCK" 2>/dev/null || true
-    
+
     # Clean up test directory
     rm -rf "$TEST_DIR" 2>/dev/null || true
-    
+
     # Summary
     echo -e "\n${YELLOW}=== PERFORMANCE TEST SUMMARY ===${NC}"
     echo -e "Total tests: $TEST_COUNT"
     echo -e "${GREEN}Passed: $PASS_COUNT${NC}"
     echo -e "${RED}Failed: $FAIL_COUNT${NC}"
-    
+
     if [ $FAIL_COUNT -eq 0 ]; then
         echo -e "\n${GREEN}All performance tests passed!${NC}"
         exit 0
@@ -106,7 +106,7 @@ start_time=$(date +%s.%N)
 for i in $(seq 1 $iterations); do
     $WAITLOCK --lock-dir "$LOCK_DIR" --timeout 1 "$descriptor" >/dev/null 2>&1 &
     lock_pid=$!
-    sleep 0.001  # 1ms delay
+    sleep 0.001 # 1ms delay
     kill $lock_pid 2>/dev/null || true
     wait $lock_pid 2>/dev/null || true
 done
@@ -116,7 +116,7 @@ total_time=$(echo "$end_time - $start_time" | bc -l)
 rate=$(echo "scale=2; $iterations / $total_time" | bc -l)
 
 echo "  → Completed $iterations operations in ${total_time}s (${rate} ops/sec)"
-if (( $(echo "$rate > 10" | bc -l) )); then
+if (($(echo "$rate > 10" | bc -l))); then
     test_pass
 else
     test_fail "Operation rate too low: $rate ops/sec"
@@ -134,7 +134,7 @@ start_time=$(date +%s.%N)
 for i in $(seq 1 $num_processes); do
     $WAITLOCK --lock-dir "$LOCK_DIR" --timeout 5 "$descriptor" >/dev/null 2>&1 &
     pids+=($!)
-    sleep 0.01  # Small delay to avoid overwhelming
+    sleep 0.01 # Small delay to avoid overwhelming
 done
 
 # Wait for all processes to complete
@@ -168,7 +168,7 @@ start_time=$(date +%s.%N)
 for i in $(seq 1 $num_processes); do
     $WAITLOCK --lock-dir "$LOCK_DIR" -m $max_holders --timeout 10 "$descriptor" >/dev/null 2>&1 &
     pids+=($!)
-    sleep 0.002  # 2ms delay
+    sleep 0.002 # 2ms delay
 done
 
 # Wait for all processes to complete
@@ -183,7 +183,7 @@ end_time=$(date +%s.%N)
 total_time=$(echo "$end_time - $start_time" | bc -l)
 
 echo "  → $success_count/$num_processes processes completed in ${total_time}s"
-if [ $success_count -ge $((num_processes * 8 / 10)) ]; then  # Allow 80% success rate
+if [ $success_count -ge $((num_processes * 8 / 10)) ]; then # Allow 80% success rate
     test_pass
 else
     test_fail "Too few processes completed: $success_count/$num_processes"
@@ -208,7 +208,7 @@ total_time=$(echo "$end_time - $start_time" | bc -l)
 rate=$(echo "scale=2; $cycles / $total_time" | bc -l)
 
 echo "  → Completed $cycles cycles in ${total_time}s (${rate} cycles/sec)"
-if (( $(echo "$rate > 5" | bc -l) )); then
+if (($(echo "$rate > 5" | bc -l))); then
     test_pass
 else
     test_fail "Cycle rate too low: $rate cycles/sec"
@@ -250,7 +250,7 @@ for pid in "${pids[@]}"; do
     wait $pid 2>/dev/null || true
 done
 
-if [ $memory_increase -lt 10000 ]; then  # Less than 10MB increase
+if [ $memory_increase -lt 10000 ]; then # Less than 10MB increase
     test_pass
 else
     test_fail "Memory increase too high: ${memory_increase}KB"
@@ -268,7 +268,7 @@ start_time=$(date +%s.%N)
 for i in $(seq 1 $num_locks); do
     $WAITLOCK --lock-dir "$LOCK_DIR" --timeout 5 "${base_descriptor}_$i" >/dev/null 2>&1 &
     pids+=($!)
-    
+
     # Batch creation to avoid overwhelming
     if [ $((i % 50)) -eq 0 ]; then
         sleep 0.1
@@ -295,7 +295,7 @@ for pid in "${pids[@]}"; do
     wait $pid 2>/dev/null || true
 done
 
-if [ $active_locks -ge $((num_locks * 8 / 10)) ]; then  # Allow 80% success rate
+if [ $active_locks -ge $((num_locks * 8 / 10)) ]; then # Allow 80% success rate
     test_pass
 else
     test_fail "Too few locks created: $active_locks/$num_locks"
@@ -311,10 +311,10 @@ for i in $(seq 1 $io_operations); do
     # Create lock
     $WAITLOCK --lock-dir "$LOCK_DIR" "$descriptor" >/dev/null 2>&1 &
     lock_pid=$!
-    
+
     # List locks (read operation)
     $WAITLOCK --lock-dir "$LOCK_DIR" --list >/dev/null 2>&1
-    
+
     # Release lock
     kill $lock_pid 2>/dev/null || true
     wait $lock_pid 2>/dev/null || true
@@ -325,7 +325,7 @@ total_time=$(echo "$end_time - $start_time" | bc -l)
 rate=$(echo "scale=2; $io_operations / $total_time" | bc -l)
 
 echo "  → Completed $io_operations I/O operations in ${total_time}s (${rate} ops/sec)"
-if (( $(echo "$rate > 2" | bc -l) )); then
+if (($(echo "$rate > 2" | bc -l))); then
     test_pass
 else
     test_fail "I/O rate too low: $rate ops/sec"
@@ -358,7 +358,7 @@ echo "  → Average timeout: ${avg_timeout}s per operation"
 kill $holder_pid 2>/dev/null || true
 wait $holder_pid 2>/dev/null || true
 
-if (( $(echo "$avg_timeout < 0.2" | bc -l) )); then
+if (($(echo "$avg_timeout < 0.2" | bc -l))); then
     test_pass
 else
     test_fail "Timeout too slow: ${avg_timeout}s average"
@@ -376,13 +376,13 @@ created_count=0
 for i in $(seq 1 $max_processes); do
     $WAITLOCK --lock-dir "$LOCK_DIR" -m $max_processes --timeout 1 "$descriptor" >/dev/null 2>&1 &
     lock_pid=$!
-    
+
     # Check if process actually started
     if kill -0 $lock_pid 2>/dev/null; then
         pids+=($lock_pid)
         created_count=$((created_count + 1))
     fi
-    
+
     sleep 0.01
 done
 
@@ -397,7 +397,7 @@ for pid in "${pids[@]}"; do
     wait $pid 2>/dev/null || true
 done
 
-if [ $created_count -ge $((max_processes * 7 / 10)) ]; then  # Allow 70% success rate
+if [ $created_count -ge $((max_processes * 7 / 10)) ]; then # Allow 70% success rate
     test_pass
 else
     test_fail "Too few processes created: $created_count/$max_processes"
@@ -415,11 +415,11 @@ start_time=$(date +%s.%N)
 for dir_num in $(seq 1 $num_dirs); do
     test_lock_dir="$TEST_DIR/locks_$dir_num"
     mkdir -p "$test_lock_dir"
-    
+
     for lock_num in $(seq 1 $locks_per_dir); do
         $WAITLOCK --lock-dir "$test_lock_dir" "scalability_${dir_num}_${lock_num}" >/dev/null 2>&1 &
         total_locks=$((total_locks + 1))
-        
+
         if [ $((lock_num % 10)) -eq 0 ]; then
             sleep 0.01
         fi

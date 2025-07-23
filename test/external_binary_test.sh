@@ -29,20 +29,20 @@ START_TIME=$(date +%s)
 # Cleanup function
 cleanup() {
     echo -e "\n${YELLOW}Cleaning up external test environment...${NC}"
-    
+
     # Kill any remaining waitlock processes
     pkill -f "$WAITLOCK" 2>/dev/null || true
-    
+
     # Clean up test directory
     rm -rf "$TEST_DIR" 2>/dev/null || true
-    
+
     # Clean up environment variables
     unset WAITLOCK_DEBUG WAITLOCK_TIMEOUT WAITLOCK_DIR WAITLOCK_SLOT HOME
-    
+
     # Calculate total time
     END_TIME=$(date +%s)
     TOTAL_TIME=$((END_TIME - START_TIME))
-    
+
     # Summary
     echo -e "\n${CYAN}============================================================${NC}"
     echo -e "${CYAN}=== EXTERNAL BINARY TEST SUMMARY ===${NC}"
@@ -51,7 +51,7 @@ cleanup() {
     echo -e "Execution time: ${TOTAL_TIME}s"
     echo -e "${GREEN}Passed: $PASS_COUNT${NC}"
     echo -e "${RED}Failed: $FAIL_COUNT${NC}"
-    
+
     if [ $FAIL_COUNT -eq 0 ]; then
         echo -e "\n${GREEN}🎉 ALL EXTERNAL TESTS PASSED! 🎉${NC}"
         echo -e "${GREEN}waitlock binary is working correctly from the shell!${NC}"
@@ -87,7 +87,7 @@ wait_for_lock() {
     local descriptor="$1"
     local timeout=5
     local count=0
-    
+
     while [ $count -lt $timeout ]; do
         if $WAITLOCK --lock-dir "$LOCK_DIR" --list 2>/dev/null | grep -q "$descriptor"; then
             return 0
@@ -103,7 +103,7 @@ wait_for_unlock() {
     local descriptor="$1"
     local timeout=5
     local count=0
-    
+
     while [ $count -lt $timeout ]; do
         if ! $WAITLOCK --lock-dir "$LOCK_DIR" --list 2>/dev/null | grep -q "$descriptor"; then
             return 0
@@ -167,14 +167,14 @@ MUTEX_PID=$!
 echo "  → Waiting for lock to appear..."
 if wait_for_lock "basic_mutex"; then
     echo "    Lock appeared in list"
-    
+
     echo "  → Verifying lock is held..."
     if ! $WAITLOCK --lock-dir "$LOCK_DIR" --check basic_mutex >/dev/null 2>&1; then
         echo "    Check correctly shows lock is held"
-        
+
         echo "  → Terminating lock holder..."
         kill $MUTEX_PID 2>/dev/null || true
-        
+
         echo "  → Waiting for lock to be released..."
         if wait_for_unlock "basic_mutex"; then
             echo "    Lock properly released"
@@ -208,7 +208,7 @@ SEM_COUNT=$($WAITLOCK --lock-dir "$LOCK_DIR" --list 2>/dev/null | grep -c "semap
 
 if [ "$SEM_COUNT" -eq 3 ]; then
     echo "    All 3 semaphore slots occupied"
-    
+
     echo "  → Trying to acquire 4th slot (should fail)..."
     if ! $WAITLOCK --lock-dir "$LOCK_DIR" -m 3 --timeout 1 semaphore_test >/dev/null 2>&1; then
         echo "    4th slot correctly rejected"
@@ -236,9 +236,9 @@ START_TIME=$(date +%s)
 if ! $WAITLOCK --lock-dir "$LOCK_DIR" --timeout 2 timeout_test >/dev/null 2>&1; then
     END_TIME=$(date +%s)
     DURATION=$((END_TIME - START_TIME))
-    
+
     echo "    Timeout occurred after ${DURATION}s"
-    
+
     if [ $DURATION -ge 2 ] && [ $DURATION -le 4 ]; then
         test_pass
     else
@@ -255,20 +255,20 @@ test_start "Check functionality"
 echo "  → Testing check on non-existent lock..."
 if $WAITLOCK --lock-dir "$LOCK_DIR" --check non_existent_lock >/dev/null 2>&1; then
     echo "    Non-existent lock correctly shows as available"
-    
+
     echo "  → Starting lock holder..."
     $WAITLOCK --lock-dir "$LOCK_DIR" check_test >/dev/null 2>&1 &
     CHECK_PID=$!
-    
+
     sleep 1
-    
+
     echo "  → Testing check on held lock..."
     if ! $WAITLOCK --lock-dir "$LOCK_DIR" --check check_test >/dev/null 2>&1; then
         echo "    Held lock correctly shows as unavailable"
-        
+
         kill $CHECK_PID 2>/dev/null || true
         sleep 1
-        
+
         echo "  → Testing check on released lock..."
         if $WAITLOCK --lock-dir "$LOCK_DIR" --check check_test >/dev/null 2>&1; then
             echo "    Released lock correctly shows as available"
@@ -290,21 +290,21 @@ echo "  → Testing empty list..."
 LIST_OUTPUT=$($WAITLOCK --lock-dir "$LOCK_DIR" --list 2>/dev/null)
 if echo "$LIST_OUTPUT" | grep -q "DESCRIPTOR"; then
     echo "    Empty list shows header"
-    
+
     echo "  → Starting lock for list test..."
     $WAITLOCK --lock-dir "$LOCK_DIR" list_test >/dev/null 2>&1 &
     LIST_PID=$!
-    
+
     sleep 1
-    
+
     echo "  → Testing list with active lock..."
     if $WAITLOCK --lock-dir "$LOCK_DIR" --list 2>/dev/null | grep -q "list_test"; then
         echo "    Active lock appears in list"
-        
+
         echo "  → Testing CSV format..."
         if $WAITLOCK --lock-dir "$LOCK_DIR" --list --format csv 2>/dev/null | grep -q "list_test"; then
             echo "    CSV format works"
-            
+
             echo "  → Testing null format..."
             if $WAITLOCK --lock-dir "$LOCK_DIR" --list --format null 2>/dev/null | grep -q "list_test"; then
                 echo "    Null format works"
@@ -318,7 +318,7 @@ if echo "$LIST_OUTPUT" | grep -q "DESCRIPTOR"; then
     else
         test_fail "Active lock should appear in list"
     fi
-    
+
     kill $LIST_PID 2>/dev/null || true
 else
     test_fail "List should show header"
@@ -335,11 +335,11 @@ sleep 1
 echo "  → Verifying lock is held..."
 if wait_for_lock "done_test"; then
     echo "    Lock confirmed active"
-    
+
     echo "  → Sending done signal..."
     if $WAITLOCK --lock-dir "$LOCK_DIR" --done done_test >/dev/null 2>&1; then
         echo "    Done signal sent successfully"
-        
+
         echo "  → Waiting for lock to be released..."
         if wait_for_unlock "done_test"; then
             echo "    Lock properly released after done signal"
@@ -363,7 +363,7 @@ EXEC_OUTPUT=$($WAITLOCK --lock-dir "$LOCK_DIR" --exec "echo Hello World" exec_te
 
 if [ "$EXEC_OUTPUT" = "Hello World" ]; then
     echo "    Command executed successfully"
-    
+
     echo "  → Verifying lock was released..."
     if $WAITLOCK --lock-dir "$LOCK_DIR" --check exec_test >/dev/null 2>&1; then
         echo "    Lock properly released after command"
@@ -389,20 +389,20 @@ sleep 1
 echo "  → Checking if lock file was created in custom directory..."
 if ls "$CUSTOM_DIR"/*.lock >/dev/null 2>&1; then
     echo "    Lock file created in custom directory"
-    
+
     kill $ENV_PID 2>/dev/null || true
-    
+
     echo "  → Testing WAITLOCK_TIMEOUT environment variable..."
     START_TIME=$(date +%s)
     WAITLOCK_TIMEOUT=1 $WAITLOCK --lock-dir "$LOCK_DIR" timeout_env_test >/dev/null 2>&1 &
     TIMEOUT_ENV_PID=$!
     sleep 0.5
-    
+
     # This should timeout in ~1 second due to environment variable
     if ! WAITLOCK_TIMEOUT=1 $WAITLOCK --lock-dir "$LOCK_DIR" timeout_env_test >/dev/null 2>&1; then
         END_TIME=$(date +%s)
         DURATION=$((END_TIME - START_TIME))
-        
+
         if [ $DURATION -ge 1 ] && [ $DURATION -le 3 ]; then
             echo "    Environment timeout respected"
             test_pass
@@ -412,7 +412,7 @@ if ls "$CUSTOM_DIR"/*.lock >/dev/null 2>&1; then
     else
         test_fail "Environment timeout should have occurred"
     fi
-    
+
     kill $TIMEOUT_ENV_PID 2>/dev/null || true
 else
     test_fail "Lock file not created in custom directory"
@@ -430,10 +430,10 @@ sleep 1
 echo "  → Verifying lock is held..."
 if wait_for_lock "signal_test"; then
     echo "    Lock confirmed active"
-    
+
     echo "  → Sending SIGTERM..."
     kill -TERM $SIGNAL_PID 2>/dev/null || true
-    
+
     echo "  → Waiting for cleanup..."
     if wait_for_unlock "signal_test"; then
         echo "    Lock properly cleaned up after signal"
@@ -484,10 +484,10 @@ CONT_PID2=$!
 echo "  → Waiting for second process to timeout..."
 if ! wait $CONT_PID2 2>/dev/null; then
     echo "    Second process correctly timed out"
-    
+
     echo "  → Releasing first lock..."
     kill $CONT_PID1 2>/dev/null || true
-    
+
     echo "  → Trying to acquire lock again..."
     if $WAITLOCK --lock-dir "$LOCK_DIR" --timeout 1 contention_test >/dev/null 2>&1; then
         echo "    Lock successfully acquired after release"
@@ -515,11 +515,11 @@ test_start "Error conditions"
 echo "  → Testing invalid descriptor..."
 if ! $WAITLOCK --lock-dir "$LOCK_DIR" "invalid@descriptor" >/dev/null 2>&1; then
     echo "    Invalid descriptor correctly rejected"
-    
+
     echo "  → Testing missing descriptor..."
     if ! $WAITLOCK --lock-dir "$LOCK_DIR" >/dev/null 2>&1; then
         echo "    Missing descriptor correctly rejected"
-        
+
         echo "  → Testing invalid timeout..."
         if ! $WAITLOCK --lock-dir "$LOCK_DIR" --timeout -1 error_test >/dev/null 2>&1; then
             echo "    Invalid timeout correctly rejected"
@@ -567,12 +567,12 @@ sleep 1
 echo "  → Verifying lock file exists..."
 if ls "$LOCK_DIR"/persistence_test.*.lock >/dev/null 2>&1; then
     echo "    Lock file created"
-    
+
     echo "  → Killing process and checking cleanup..."
     kill $PERSIST_PID 2>/dev/null || true
-    
+
     sleep 1
-    
+
     echo "  → Verifying lock file is cleaned up..."
     if ! ls "$LOCK_DIR"/persistence_test.*.lock >/dev/null 2>&1; then
         echo "    Lock file properly cleaned up"
@@ -597,12 +597,12 @@ echo "  → Testing human format..."
 HUMAN_OUTPUT=$($WAITLOCK --lock-dir "$LOCK_DIR" --list --format human 2>/dev/null)
 if echo "$HUMAN_OUTPUT" | grep -q "DESCRIPTOR" && echo "$HUMAN_OUTPUT" | grep -q "output_test"; then
     echo "    Human format correct"
-    
+
     echo "  → Testing CSV format..."
     CSV_OUTPUT=$($WAITLOCK --lock-dir "$LOCK_DIR" --list --format csv 2>/dev/null)
     if echo "$CSV_OUTPUT" | grep -q "descriptor,pid" && echo "$CSV_OUTPUT" | grep -q "output_test"; then
         echo "    CSV format correct"
-        
+
         echo "  → Testing null format..."
         NULL_OUTPUT=$($WAITLOCK --lock-dir "$LOCK_DIR" --list --format null 2>/dev/null)
         if echo "$NULL_OUTPUT" | grep -q "output_test"; then

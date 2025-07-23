@@ -24,19 +24,19 @@ FAIL_COUNT=0
 # Cleanup function
 cleanup() {
     echo -e "\n${YELLOW}Cleaning up debug output tests...${NC}"
-    
+
     # Kill any remaining waitlock processes
     pkill -f "$WAITLOCK" 2>/dev/null || true
-    
+
     # Clean up test directory
     rm -rf "$TEST_DIR" 2>/dev/null || true
-    
+
     # Summary
     echo -e "\n${YELLOW}=== DEBUG OUTPUT TEST SUMMARY ===${NC}"
     echo -e "Total tests: $TEST_COUNT"
     echo -e "${GREEN}Passed: $PASS_COUNT${NC}"
     echo -e "${RED}Failed: $FAIL_COUNT${NC}"
-    
+
     if [ $FAIL_COUNT -eq 0 ]; then
         echo -e "\n${GREEN}All debug output tests passed!${NC}"
         exit 0
@@ -184,7 +184,10 @@ CHECK_PID=$!
 sleep 1
 
 # Check with debug output - waitlock --check exits with code 1 if busy, no output
-check_result=$($WAITLOCK --verbose --lock-dir "$LOCK_DIR" --check checkdebug 2>&1; echo "EXIT_CODE:$?")
+check_result=$(
+    $WAITLOCK --verbose --lock-dir "$LOCK_DIR" --check checkdebug 2>&1
+    echo "EXIT_CODE:$?"
+)
 if echo "$check_result" | grep -q "EXIT_CODE:1"; then
     test_pass
 else

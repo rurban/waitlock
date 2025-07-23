@@ -25,22 +25,22 @@ FAIL_COUNT=0
 # Cleanup function
 cleanup() {
     echo -e "\n${YELLOW}Cleaning up syslog tests...${NC}"
-    
+
     # Kill any remaining waitlock processes
     pkill -f "$WAITLOCK" 2>/dev/null || true
-    
+
     # Clean up test directory
     rm -rf "$TEST_DIR" 2>/dev/null || true
-    
+
     # Clean up syslog test file
     rm -f "$SYSLOG_TEST_FILE" 2>/dev/null || true
-    
+
     # Summary
     echo -e "\n${YELLOW}=== SYSLOG INTEGRATION TEST SUMMARY ===${NC}"
     echo -e "Total tests: $TEST_COUNT"
     echo -e "${GREEN}Passed: $PASS_COUNT${NC}"
     echo -e "${RED}Failed: $FAIL_COUNT${NC}"
-    
+
     if [ $FAIL_COUNT -eq 0 ]; then
         echo -e "\n${GREEN}All syslog integration tests passed!${NC}"
         exit 0
@@ -73,15 +73,15 @@ test_fail() {
 capture_syslog() {
     local test_name="$1"
     local expected_pattern="$2"
-    
+
     # Clear any existing syslog test file
-    > "$SYSLOG_TEST_FILE" 2>/dev/null || true
-    
+    >"$SYSLOG_TEST_FILE" 2>/dev/null || true
+
     # Run the command and capture syslog output
     # Note: This is a simplified approach - in production you'd use logger or monitor actual syslog
     local cmd_output
     cmd_output=$(eval "$3" 2>&1) || true
-    
+
     # For testing purposes, we'll check if the syslog flag was processed
     # In a real implementation, this would check actual syslog files
     if echo "$cmd_output" | grep -q "syslog" 2>/dev/null; then
@@ -130,8 +130,7 @@ echo -e "${GREEN}Setup complete!${NC}"
 test_start "Basic --syslog flag functionality"
 if $WAITLOCK --help 2>&1 | grep -q "\-\-syslog"; then
     # Test that the flag is recognized
-    if timeout 5 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog testlog1 > /dev/null 2>&1 &
-    then
+    if timeout 5 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog testlog1 >/dev/null 2>&1 & then
         SYSLOG_PID=$!
         sleep 1
         kill $SYSLOG_PID 2>/dev/null || true
@@ -148,8 +147,7 @@ fi
 test_start "Syslog facility option (--syslog-facility)"
 if $WAITLOCK --help 2>&1 | grep -q "\-\-syslog-facility"; then
     # Test default facility
-    if timeout 5 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility daemon testlog2 > /dev/null 2>&1 &
-    then
+    if timeout 5 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility daemon testlog2 >/dev/null 2>&1 & then
         SYSLOG_PID=$!
         sleep 1
         kill $SYSLOG_PID 2>/dev/null || true
@@ -168,7 +166,7 @@ facilities=("daemon" "local0" "local1" "local2" "local3" "local4" "local5" "loca
 facility_test_passed=true
 
 for facility in "${facilities[@]}"; do
-    if ! timeout 5 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility "$facility" "testlog_$facility" --exec echo "test" > /dev/null 2>&1; then
+    if ! timeout 5 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility "$facility" "testlog_$facility" --exec echo "test" >/dev/null 2>&1; then
         facility_test_passed=false
         break
     fi
@@ -182,11 +180,10 @@ fi
 
 # Test 4: Syslog with mutex operations
 test_start "Syslog with mutex operations"
-if timeout 10 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility local0 testmutex > /dev/null 2>&1 &
-then
+if timeout 10 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility local0 testmutex >/dev/null 2>&1 & then
     MUTEX_PID=$!
     sleep 2
-    
+
     # Test that lock was acquired (should appear in list)
     if $WAITLOCK --lock-dir "$LOCK_DIR" --list | grep -q "testmutex"; then
         kill $MUTEX_PID 2>/dev/null || true
@@ -203,11 +200,10 @@ fi
 
 # Test 5: Syslog with semaphore operations
 test_start "Syslog with semaphore operations"
-if timeout 10 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility local1 -m 2 testsem > /dev/null 2>&1 &
-then
+if timeout 10 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility local1 -m 2 testsem >/dev/null 2>&1 & then
     SEM_PID=$!
     sleep 2
-    
+
     # Test that semaphore was acquired
     if $WAITLOCK --lock-dir "$LOCK_DIR" --list | grep -q "testsem"; then
         kill $SEM_PID 2>/dev/null || true
@@ -224,13 +220,12 @@ fi
 
 # Test 6: Syslog with --done functionality
 test_start "Syslog with --done functionality"
-if timeout 10 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility local2 testdone > /dev/null 2>&1 &
-then
+if timeout 10 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility local2 testdone >/dev/null 2>&1 & then
     DONE_PID=$!
     sleep 2
-    
+
     # Use --done to signal release
-    if $WAITLOCK --lock-dir "$LOCK_DIR" --done testdone > /dev/null 2>&1; then
+    if $WAITLOCK --lock-dir "$LOCK_DIR" --done testdone >/dev/null 2>&1; then
         sleep 1
         # Process should have exited
         if ! kill -0 $DONE_PID 2>/dev/null; then
@@ -260,7 +255,7 @@ fi
 
 # Test 8: Invalid syslog facility
 test_start "Invalid syslog facility handling"
-if timeout 5 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility invalid_facility testinvalid > /dev/null 2>&1; then
+if timeout 5 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility invalid_facility testinvalid >/dev/null 2>&1; then
     test_fail "Invalid syslog facility should be rejected"
 else
     test_pass
@@ -268,8 +263,7 @@ fi
 
 # Test 9: Syslog without facility (should use default)
 test_start "Syslog without facility (default behavior)"
-if timeout 5 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog testdefault > /dev/null 2>&1 &
-then
+if timeout 5 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog testdefault >/dev/null 2>&1 & then
     DEFAULT_PID=$!
     sleep 1
     kill $DEFAULT_PID 2>/dev/null || true
@@ -281,12 +275,12 @@ fi
 
 # Test 10: Syslog with timeout scenarios
 test_start "Syslog with timeout scenarios"
-$WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility local4 testtimeout > /dev/null 2>&1 &
+$WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility local4 testtimeout >/dev/null 2>&1 &
 TIMEOUT_HOLDER_PID=$!
 sleep 1
 
 # Try to acquire with timeout (should fail and log to syslog)
-if ! timeout 5 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility local4 -t 2 testtimeout > /dev/null 2>&1; then
+if ! timeout 5 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility local4 -t 2 testtimeout >/dev/null 2>&1; then
     kill $TIMEOUT_HOLDER_PID 2>/dev/null || true
     wait $TIMEOUT_HOLDER_PID 2>/dev/null || true
     test_pass
@@ -298,8 +292,7 @@ fi
 
 # Test 11: Syslog with verbose mode
 test_start "Syslog with verbose mode"
-if timeout 5 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility local5 --verbose testverbose > /dev/null 2>&1 &
-then
+if timeout 5 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility local5 --verbose testverbose >/dev/null 2>&1 & then
     VERBOSE_PID=$!
     sleep 1
     kill $VERBOSE_PID 2>/dev/null || true
@@ -311,8 +304,7 @@ fi
 
 # Test 12: Syslog with quiet mode
 test_start "Syslog with quiet mode"
-if timeout 5 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility local6 --quiet testquiet > /dev/null 2>&1 &
-then
+if timeout 5 $WAITLOCK --lock-dir "$LOCK_DIR" --syslog --syslog-facility local6 --quiet testquiet >/dev/null 2>&1 & then
     QUIET_PID=$!
     sleep 1
     kill $QUIET_PID 2>/dev/null || true

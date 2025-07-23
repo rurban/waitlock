@@ -53,9 +53,9 @@ HUMAN_PID=$!
 sleep 1
 
 HUMAN_OUTPUT=$($WAITLOCK --lock-dir "$LOCK_DIR" --list --format human 2>/dev/null)
-if echo "$HUMAN_OUTPUT" | grep -q "DESCRIPTOR" && \
-   echo "$HUMAN_OUTPUT" | grep -q "PID" && \
-   echo "$HUMAN_OUTPUT" | grep -q "human_test"; then
+if echo "$HUMAN_OUTPUT" | grep -q "DESCRIPTOR" &&
+    echo "$HUMAN_OUTPUT" | grep -q "PID" &&
+    echo "$HUMAN_OUTPUT" | grep -q "human_test"; then
     test_pass "Human format shows proper columns"
 else
     test_fail "Human format missing required columns"
@@ -71,8 +71,8 @@ CSV_PID=$!
 sleep 1
 
 CSV_OUTPUT=$($WAITLOCK --lock-dir "$LOCK_DIR" --list --format csv 2>/dev/null)
-if echo "$CSV_OUTPUT" | grep -q "descriptor,pid" && \
-   echo "$CSV_OUTPUT" | grep -q "csv_test"; then
+if echo "$CSV_OUTPUT" | grep -q "descriptor,pid" &&
+    echo "$CSV_OUTPUT" | grep -q "csv_test"; then
     test_pass "CSV format works correctly"
 else
     test_fail "CSV format incorrect"

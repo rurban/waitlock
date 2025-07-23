@@ -30,11 +30,11 @@ FAIL_COUNT=0
 test_suite_start() {
     local suite_name="$1"
     echo -e "${CYAN}=== $suite_name ===${NC}"
-    
+
     # Create test directory if it doesn't exist
     mkdir -p "$LOCK_DIR"
     chmod 755 "$LOCK_DIR"
-    
+
     # Reset per-suite counters
     TEST_COUNT=0
     PASS_COUNT=0
@@ -47,10 +47,10 @@ test_suite_end() {
     export GLOBAL_TEST_COUNT=$((GLOBAL_TEST_COUNT + TEST_COUNT))
     export GLOBAL_PASS_COUNT=$((GLOBAL_PASS_COUNT + PASS_COUNT))
     export GLOBAL_FAIL_COUNT=$((GLOBAL_FAIL_COUNT + FAIL_COUNT))
-    
+
     # Suite summary
     echo -e "${YELLOW}Suite: $TEST_COUNT tests, $PASS_COUNT passed, $FAIL_COUNT failed${NC}"
-    
+
     # Kill any remaining processes from this suite
     pkill -f "$WAITLOCK" 2>/dev/null || true
 }
@@ -76,7 +76,7 @@ wait_for_lock() {
     local descriptor="$1"
     local timeout="${2:-5}"
     local count=0
-    
+
     while [ $count -lt $timeout ]; do
         if $WAITLOCK --lock-dir "$LOCK_DIR" --list 2>/dev/null | grep -q "$descriptor"; then
             return 0
@@ -92,7 +92,7 @@ wait_for_unlock() {
     local descriptor="$1"
     local timeout="${2:-5}"
     local count=0
-    
+
     while [ $count -lt $timeout ]; do
         if ! $WAITLOCK --lock-dir "$LOCK_DIR" --list 2>/dev/null | grep -q "$descriptor"; then
             return 0
@@ -116,10 +116,10 @@ check_binary() {
 final_cleanup() {
     # Kill any remaining waitlock processes
     pkill -f "$WAITLOCK" 2>/dev/null || true
-    
+
     # Clean up test directory
     rm -rf "$TEST_DIR" 2>/dev/null || true
-    
+
     # Clean up environment variables
     unset WAITLOCK_DEBUG WAITLOCK_TIMEOUT WAITLOCK_DIR WAITLOCK_SLOT
 }

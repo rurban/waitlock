@@ -1,8 +1,8 @@
 #ifndef DEBUG_UTILS_H
 #define DEBUG_UTILS_H
 
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 // Forward declaration of global_state to access verbose flag
 struct global_state;

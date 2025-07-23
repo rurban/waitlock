@@ -50,7 +50,7 @@ sleep 0.5
 if wait_for_lock "test_exec_release"; then
     # Wait for command to complete
     wait $EXEC_PID 2>/dev/null || true
-    
+
     # Verify lock is released
     if wait_for_unlock "test_exec_release"; then
         test_pass "Exec releases lock on command completion"
@@ -154,7 +154,7 @@ sleep 1
 if wait_for_lock "test_exec_long"; then
     # Wait for completion
     wait $EXEC_LONG_PID 2>/dev/null || true
-    
+
     # Should release lock
     if wait_for_unlock "test_exec_long"; then
         test_pass "Exec handles long running commands"

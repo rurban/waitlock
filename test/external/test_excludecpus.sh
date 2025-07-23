@@ -14,7 +14,7 @@ test_start "Basic excludeCPUs"
 if [ $CPU_COUNT -gt 2 ]; then
     EXCLUDE_COUNT=2
     EXPECTED_COUNT=$((CPU_COUNT - EXCLUDE_COUNT))
-    
+
     # Start processes up to expected count
     EXCLUDE_PIDS=()
     for i in $(seq 1 $EXPECTED_COUNT); do
@@ -45,7 +45,7 @@ test_start "ExcludeCPUs limit enforcement"
 if [ $CPU_COUNT -gt 1 ]; then
     EXCLUDE_LIMIT=1
     EXPECTED_LIMIT=$((CPU_COUNT - EXCLUDE_LIMIT))
-    
+
     # Fill all available slots
     EXCLUDE_LIMIT_PIDS=()
     for i in $(seq 1 $EXPECTED_LIMIT); do
@@ -163,7 +163,7 @@ test_start "ExcludeCPUs with timeout"
 if [ $CPU_COUNT -gt 1 ]; then
     EXCLUDE_TIMEOUT=1
     EXPECTED_TIMEOUT=$((CPU_COUNT - EXCLUDE_TIMEOUT))
-    
+
     # Fill all slots
     EXCLUDE_TIMEOUT_PIDS=()
     for i in $(seq 1 $EXPECTED_TIMEOUT); do
@@ -178,7 +178,7 @@ if [ $CPU_COUNT -gt 1 ]; then
     if ! $WAITLOCK --lock-dir "$LOCK_DIR" --onePerCPU --excludeCPUs $EXCLUDE_TIMEOUT --timeout 2 exclude_timeout >/dev/null 2>&1; then
         END_TIME=$(date +%s)
         DURATION=$((END_TIME - START_TIME))
-        
+
         if [ $DURATION -ge 2 ] && [ $DURATION -le 4 ]; then
             test_pass "ExcludeCPUs respects timeout"
         else
@@ -208,7 +208,7 @@ if [ $CPU_COUNT -gt 1 ]; then
     if wait_for_lock "exclude_exec"; then
         # Wait for completion
         wait $EXCLUDE_EXEC_PID 2>/dev/null || true
-        
+
         # Should release lock
         if wait_for_unlock "exclude_exec"; then
             test_pass "ExcludeCPUs works with exec"
