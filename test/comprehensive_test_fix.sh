@@ -27,7 +27,9 @@ sudo chown root:root /var/lock/waitlock/
 
 # Step 5: Rebuild with clean slate
 echo "Step 5: Rebuilding waitlock with clean environment..."
-cd /home/bigattichouse/workspace/waitlock/src
+if [ -d ~/workspace/waitlock ]; then
+    cd ~/workspace/waitlock/src
+fi
 make clean
 make
 
@@ -37,7 +39,7 @@ echo "Before test run - lock directory:"
 ls -la /var/lock/waitlock/ || true
 
 # Run the test
-./waitlock --test
+build/bin/waitlock --test
 
 echo "After test run - lock directory:"
 ls -la /var/lock/waitlock/ || true
