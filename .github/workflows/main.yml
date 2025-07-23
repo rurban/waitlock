@@ -1,0 +1,88 @@
+name: Github CI
+on: [push, pull_request]
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      with:
+        fetch-depth: 1
+    - run: autoreconf -fi
+    - run: ./configure
+    - run: make
+    - run: make check
+  macOS:
+    name: macOS
+    runs-on: macOS-latest
+    steps:
+    - name: init
+      run: brew install autoconf automake libtool
+    - name: checkout
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+    - run: autoreconf -fi
+    - run: ./configure
+    - run: make
+    - run: make check
+  mingw:
+    name: mingw
+    runs-on: windows-latest
+    env:
+      MSYS2_DIR: msys64
+      MSYS2_ARCH: x86_64
+      MSYSTEM: MINGW64
+      ARCH: win64
+      PLATFORM: x64
+      #PATH: "C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
+    steps:
+      # see https://github.com/msys2/setup-msys2
+    - name: setup-msys2
+      uses: msys2/setup-msys2@40677d36a502eb2cf0fb808cc9dec31bf6152638 # v2.28.0
+      with:
+        path-type: minimal
+        update: true
+        install: >-
+          git
+          base-devel
+          coreutils
+          mingw-w64-x86_64-toolchain
+          autoconf-wrapper
+          automake-wrapper
+    - run: reg add "HKLM\Software\Microsoft\Windows\Windows Error Reporting" /f /v DontShowUI /d 1
+    - run: git config --global core.autocrlf input
+    - name: checkout
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+    - shell: msys2 {0}
+      run: autoreconf -fi
+      continue-on-error: true
+    - shell: msys2 {0}
+      run: ./configure
+    - shell: msys2 {0}
+      run: make
+    - shell: msys2 {0}
+      run: make check
+  aarch64:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: uraimo/run-on-arch-action@d94c13912ea685de38fccc1109385b83fd79427d # v3.0.1
+        name: Check on aarch64
+        id: runcmd
+        with:
+          arch: aarch64
+          githubToken: ${{ github.token }}
+          distro: ubuntu_latest
+          install: |
+            apt-get update -q -y
+            apt-get install -y make gcc grep bash file git libtool automake autoconf \
+                               libtext-diff-perl pkg-config
+            git config --global --add safe.directory /home/runner/work/safeclib/safeclib
+          run: |
+            autoreconf -fi
+            ./configure
+            make
+            make test
