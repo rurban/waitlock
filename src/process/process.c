@@ -9,7 +9,14 @@
 
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) ||     \
     defined(__APPLE__)
+// FIXME macOS Xcode 15.4
+// https://stackoverflow.com/questions/15393905/c-pcap-library-unknown-types-error
+#undef _XOPEN_SOURCE
+#undef _POSIX_C_SOURCE
 #include <sys/sysctl.h>
+#ifdef __FreeBSD__
+#include <sys/user.h>
+#endif
 #endif
 
 #include <signal.h>

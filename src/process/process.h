@@ -3,14 +3,6 @@
 
 #include "../waitlock.h"
 
-#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) ||     \
-    defined(__APPLE__)
-#include <sys/sysctl.h>
-#ifdef __FreeBSD__
-#include <sys/user.h>
-#endif
-#endif
-
 /* Process management functions */
 bool process_exists(pid_t pid);
 char *get_process_cmdline(pid_t pid);
