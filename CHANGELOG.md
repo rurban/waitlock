@@ -20,10 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Build system now uses separate build directories for better organization
 - Updated examples in documentation to use `--done` instead of `kill` commands
 - Improved Makefile structure with proper clean targets
+- Added github actions CI with ubuntu, macOS, mingw and aarch64.
 
 ### Fixed
+- Fixed all failing tests.
 - Build artifacts are now properly separated from source code
 - Clean build directory management
+- Fixed the build with the new integrated unit-tests, macOS, mingw
+  builds still failing though.
 
 ## [1.0.0] - 2024-07-16
 
